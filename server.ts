@@ -6,6 +6,17 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Explicit route for Google AdSense ads.txt verification
+  app.get('/ads.txt', (req, res) => {
+    const adsPath = path.join(process.cwd(), 'public', 'ads.txt');
+    if (fs.existsSync(adsPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.sendFile(adsPath);
+    } else {
+      res.type('text/plain').send('google.com, pub-4744063610455678, DIRECT, f08c47fec0942fa0\n');
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
