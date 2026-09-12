@@ -4,7 +4,7 @@
  * 100% Offline-First Architecture, Resilient Asset Caching, Background Sync & Push Capabilities
  */
 
-const CACHE_NAME = 'daily-khata-pro-v2.8.2';
+const CACHE_NAME = 'daily-khata-pro-v2.8.3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -135,10 +135,14 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Bypass ONLY browser extensions and dev hot updates
+  // Bypass browser extensions, dev hot updates, and Vite development modules
   if (url.protocol.startsWith('chrome-extension') ||
       url.pathname.includes('hot-update') ||
-      url.pathname.includes('/@vite/client') ||
+      url.pathname.includes('/@vite/') ||
+      url.pathname.startsWith('/@') ||
+      url.pathname.startsWith('/node_modules/') ||
+      url.pathname.startsWith('/src/') ||
+      url.searchParams.has('v') ||
       url.pathname.includes('socket.io')) {
     return;
   }

@@ -6,6 +6,10 @@
     <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
     <meta name="HandheldFriendly" content="true" />
     <meta name="MobileOptimized" content="width" />
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4744063610455678"
+     crossorigin="anonymous"></script>
     
     <!-- Primary SEO Meta Tags -->
     <title>Daily Khata Pro — Free Open Source Financial Ledger</title>
@@ -485,7 +489,7 @@
                   const assets = [];
                   document.querySelectorAll('script[src], link[rel="stylesheet"], link[rel="modulepreload"]').forEach((el) => {
                     const src = el.getAttribute('src') || el.getAttribute('href');
-                    if (src && !src.startsWith('http') && !src.startsWith('//') && !src.includes('hot-update')) {
+                    if (src && !src.startsWith('http') && !src.startsWith('//') && !src.includes('hot-update') && !src.startsWith('/src/') && !src.startsWith('/node_modules/') && !src.startsWith('/@') && !src.includes('?v=')) {
                       assets.push(src.startsWith('/') ? src : '/' + src);
                     }
                   });

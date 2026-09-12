@@ -16,7 +16,7 @@ export default defineConfig(() => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
-      dedupe: ['react', 'react-dom', 'react-router-dom'],
+      dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
     },
     optimizeDeps: {
       include: [
@@ -25,6 +25,7 @@ export default defineConfig(() => {
         'react-dom/client',
         'react/jsx-runtime',
         'react/jsx-dev-runtime',
+        'react-router',
         'react-router-dom',
         'lucide-react',
         'motion/react',
@@ -38,7 +39,7 @@ export default defineConfig(() => {
         external: ['puppeteer', 'express', 'path', 'fs'],
         output: {
           manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
+            vendor: ['react', 'react-dom', 'react-router', 'react-router-dom'],
             icons: ['lucide-react'],
             firebase: ['firebase/app', 'firebase/auth'],
             charts: ['recharts'],
