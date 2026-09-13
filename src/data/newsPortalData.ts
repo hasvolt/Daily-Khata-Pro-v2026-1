@@ -1,3 +1,13 @@
+import { ADDITIONAL_COMMERCIAL_ARTICLES } from './additionalNewsData';
+import { EXPANDED_ARTICLES_BATCH_2 } from './expandedArticlesBatch2';
+import { EXPANDED_ARTICLES_BATCH_3 } from './expandedArticlesBatch3';
+import { EXPANDED_ARTICLES_BATCH_4 } from './expandedArticlesBatch4';
+import { EXPANDED_ARTICLES_BATCH_5 } from './expandedArticlesBatch5';
+import { EXPANDED_ARTICLES_BATCH_6 } from './expandedArticlesBatch6';
+import { EXPANDED_ARTICLES_BATCH_7 } from './expandedArticlesBatch7';
+import { EXPANDED_ARTICLES_BATCH_8 } from './expandedArticlesBatch8';
+import { EXPANDED_ARTICLES_BATCH_9 } from './expandedArticlesBatch9';
+
 export interface MarketIndex {
   symbol: string;
   name: string;
@@ -1036,5 +1046,14 @@ export const COMMERCIAL_ARTICLES: CommercialArticle[] = [
       }
     ],
     tags: ['CIBIL Score', 'Credit Report', 'RBI Rules', 'Credit Repair', 'Ombudsman Compensation', 'Financial Literacy']
-  }
+  },
+  ...ADDITIONAL_COMMERCIAL_ARTICLES,
+  ...EXPANDED_ARTICLES_BATCH_2,
+  ...EXPANDED_ARTICLES_BATCH_3,
+  ...EXPANDED_ARTICLES_BATCH_4,
+  ...EXPANDED_ARTICLES_BATCH_5,
+  ...EXPANDED_ARTICLES_BATCH_6,
+  ...EXPANDED_ARTICLES_BATCH_7,
+  ...EXPANDED_ARTICLES_BATCH_8,
+  ...EXPANDED_ARTICLES_BATCH_9
 ];

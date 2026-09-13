@@ -2843,7 +2843,7 @@ function AppContent() {
           <div className="w-36 h-px bg-gradient-to-r from-transparent via-[var(--theme-border,#213E61)]/60 to-transparent my-1"></div>
 
           {/* Legal Links */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12px] text-[var(--theme-text-muted,#94A3B8)] pb-2 pt-1 font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[13px] sm:text-[13.5px] text-[var(--theme-text-muted,#94A3B8)] pb-2 pt-1 font-medium">
             <button onClick={() => setCurrentTab('news')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors text-[var(--theme-primary,#38BDF8)] font-semibold">{language === 'hi' ? 'समाचार व रिसर्च' : 'News & Research'}</button>
             <span className="opacity-40">•</span>
             <button onClick={() => setCurrentTab('privacy')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors">Privacy Policy</button>
@@ -2860,7 +2860,7 @@ function AppContent() {
           </div>
 
           {/* Copyright Only */}
-          <p className="text-[11.5px] text-[var(--theme-text-dim,#64748B)] flex items-center justify-center gap-1.5 pb-20 sm:pb-24">
+          <p className="text-[12.5px] sm:text-[13px] text-[var(--theme-text-dim,#64748B)] flex items-center justify-center gap-1.5 pb-20 sm:pb-24">
             © {new Date().getFullYear()} Daily Khata Pro. Made with <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500" />
           </p>
         </div>
