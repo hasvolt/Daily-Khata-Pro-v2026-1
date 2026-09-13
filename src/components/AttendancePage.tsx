@@ -464,8 +464,8 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
         <title>Attendance Register - ${formatMonthTitle(selectedMonth)}</title>
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; color: #1E293B; }
-          .header { text-align: center; border-bottom: 2px solid #D97706; padding-bottom: 12px; margin-bottom: 15px; }
-          .brand { font-size: 22px; font-weight: 800; color: #D97706; }
+          .header { text-align: center; border-bottom: 2px solid #0284C7; padding-bottom: 12px; margin-bottom: 15px; }
+          .brand { font-size: 22px; font-weight: 800; color: #0284C7; }
           .subbrand { font-size: 11px; color: #64748B; margin-top: 3px; }
           .title { font-size: 16px; font-weight: 700; margin-top: 10px; }
           .stats-box { display: flex; justify-content: space-around; background: #F1F5F9; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
@@ -473,7 +473,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
           .stat-label { font-size: 11px; color: #64748B; font-weight: bold; }
           .stat-val { font-size: 16px; font-weight: 800; margin-top: 2px; }
           table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-          th { background: #D97706; color: white; padding: 8px 6px; text-align: left; }
+          th { background: #0284C7; color: white; padding: 8px 6px; text-align: left; }
           td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
           tr:nth-child(even) { background: #F8FAFC; }
           .badge { font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; }
@@ -492,7 +492,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
           <div class="stat-item"><div class="stat-label">Half Days</div><div class="stat-val">${stats.halfDays}</div></div>
           <div class="stat-item"><div class="stat-label">Total Hours</div><div class="stat-val">${stats.totalWorkingHours}h</div></div>
           <div class="stat-item"><div class="stat-label">Total Earned</div><div class="stat-val">${formatCurrency(stats.totalEarnings)}</div></div>
-          <div class="stat-item"><div class="stat-label">Pending Dues</div><div class="stat-val" style="color: #D97706;">${formatCurrency(stats.totalPending)}</div></div>
+          <div class="stat-item"><div class="stat-label">Pending Dues</div><div class="stat-val" style="color: #0284C7;">${formatCurrency(stats.totalPending)}</div></div>
         </div>
 
         <table>

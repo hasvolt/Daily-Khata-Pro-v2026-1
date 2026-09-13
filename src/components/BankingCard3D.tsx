@@ -74,7 +74,7 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
               <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0" />
                 <stop offset="40%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.75" />
-                <stop offset="80%" stopColor="var(--theme-primary, #D97706)" stopOpacity="0.85" />
+                <stop offset="80%" stopColor="var(--theme-primary, #0284C7)" stopOpacity="0.85" />
                 <stop offset="100%" stopColor="var(--theme-glow, #1E40AF)" stopOpacity="0" />
               </linearGradient>
               <pattern id="dotGrid" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">

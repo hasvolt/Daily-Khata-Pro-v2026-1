@@ -65,7 +65,7 @@ export function generateCalculatorSlipHTML(params: CalcPrintParams): string {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 3px solid #D97706;
+      border-bottom: 3px solid #0284C7;
       padding-bottom: 12px;
       margin-bottom: 20px;
     }
@@ -83,7 +83,7 @@ export function generateCalculatorSlipHTML(params: CalcPrintParams): string {
     .brand-website {
       font-size: 11.5px;
       font-weight: 700;
-      color: #D97706;
+      color: #0284C7;
       margin-top: 3px;
     }
     .meta-box {
@@ -266,7 +266,7 @@ export function generateCalculatorSlipHTML(params: CalcPrintParams): string {
           (t) => `
         <div class="tape-row">
           <span>${t.expr}</span>
-          <span style="font-weight: bold; color: #D97706;">= ${t.res}</span>
+          <span style="font-weight: bold; color: #0284C7;">= ${t.res}</span>
         </div>
       `
         )

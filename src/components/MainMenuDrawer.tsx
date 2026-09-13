@@ -450,11 +450,11 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                       { id: 'emerald', name: 'Emerald Forest', hindiName: 'पन्ना हरा', mode: 'Dark', primaryHex: '#34D399', bgHex: '#022C22' },
                       { id: 'cyan', name: 'Cyber Ocean', hindiName: 'साइबर स्यान', mode: 'Dark', primaryHex: '#22D3EE', bgHex: '#083344' },
                       { id: 'purple', name: 'Royal Violet', hindiName: 'शाही बैंगनी', mode: 'Dark', primaryHex: '#C084FC', bgHex: '#3B0764' },
-                      { id: 'yellow', name: 'Amber Gold', hindiName: 'अंबर स्वर्ण', mode: 'Dark', primaryHex: '#FACC15', bgHex: '#422006' },
+                      { id: 'yellow', name: 'Premium Gold', hindiName: 'प्रीमियम गोल्ड', mode: 'Dark', primaryHex: '#FFD200', bgHex: '#080705' },
                       { id: 'orange', name: 'Sunset Copper', hindiName: 'सनसेट संतरी', mode: 'Dark', primaryHex: '#FB923C', bgHex: '#431407' },
                       { id: 'pink', name: 'Ruby Pink', hindiName: 'रूबी गुलाबी', mode: 'Dark', primaryHex: '#F472B6', bgHex: '#500724' },
                       { id: 'black', name: 'Pitch OLED', hindiName: 'ओलेड ब्लैक', mode: 'OLED', primaryHex: '#38BDF8', bgHex: '#000000' },
-                      { id: 'light', name: 'Modern Studio', hindiName: 'मॉडर्न लाइट', mode: 'Light', primaryHex: '#D97706', bgHex: '#F1F5F9' },
+                      { id: 'light', name: 'Modern Studio', hindiName: 'मॉडर्न लाइट', mode: 'Light', primaryHex: '#0284C7', bgHex: '#F1F5F9' },
                       { id: 'white', name: 'Clean Paper', hindiName: 'सफेद मिनिमल', mode: 'Light', primaryHex: '#2563EB', bgHex: '#FFFFFF' }
                     ];
 

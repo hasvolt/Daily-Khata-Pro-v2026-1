@@ -279,7 +279,7 @@ export const LoanUdharLedgerView: React.FC<LoanUdharLedgerViewProps> = ({
     @page { size: A4 portrait; margin: 12mm 14mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px; color: #0f172a; max-width: 820px; margin: 0 auto; line-height: 1.45; background: #fff; }
-    .brand-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #D97706; padding-bottom: 12px; margin-bottom: 16px; }
+    .brand-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #0284C7; padding-bottom: 12px; margin-bottom: 16px; }
     .brand-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
     .brand-sub { font-size: 11.5px; color: #64748b; margin-top: 2px; }
     .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #0f172a; color: #fff; padding: 16px; border-radius: 8px; margin-bottom: 20px; text-align: center; }

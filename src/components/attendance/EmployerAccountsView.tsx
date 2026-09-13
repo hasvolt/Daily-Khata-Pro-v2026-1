@@ -72,17 +72,17 @@ export const EmployerAccountsView: React.FC<EmployerAccountsViewProps> = ({
         <title>Work & Payment Statement - ${employerName}</title>
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; color: #1E293B; }
-          .header { text-align: center; border-bottom: 2px solid #D97706; padding-bottom: 12px; margin-bottom: 15px; }
-          .brand { font-size: 20px; font-weight: 800; color: #D97706; }
+          .header { text-align: center; border-bottom: 2px solid #0284C7; padding-bottom: 12px; margin-bottom: 15px; }
+          .brand { font-size: 20px; font-weight: 800; color: #0284C7; }
           .subbrand { font-size: 11px; color: #64748B; margin-top: 2px; }
           .title { font-size: 16px; font-weight: 700; margin-top: 8px; }
           .summary { display: flex; justify-content: space-around; background: #F1F5F9; border-radius: 8px; padding: 12px; margin: 15px 0; }
           .summary-item { text-align: center; }
           .summary-label { font-size: 11px; color: #64748B; font-weight: bold; }
           .summary-val { font-size: 16px; font-weight: 800; margin-top: 2px; }
-          .pending { color: #D97706; }
+          .pending { color: #0284C7; }
           table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-          th { background: #D97706; color: white; padding: 7px 6px; text-align: left; }
+          th { background: #0284C7; color: white; padding: 7px 6px; text-align: left; }
           td { padding: 7px 6px; border-bottom: 1px solid #E2E8F0; }
           tr:nth-child(even) { background: #F8FAFC; }
           .status { font-weight: bold; padding: 2px 5px; border-radius: 4px; font-size: 10px; display: inline-block; }
@@ -140,7 +140,7 @@ export const EmployerAccountsView: React.FC<EmployerAccountsViewProps> = ({
                   <td>${l.jobDescription || l.workType || '-'}</td>
                   <td>${rate ? formatCurrency(rate) : '-'}</td>
                   <td>${rec ? formatCurrency(rec) : '-'}</td>
-                  <td><strong style="color: ${pend > 0 ? '#D97706' : '#15803D'}">${pend ? formatCurrency(pend) : 'PAID'}</strong></td>
+                  <td><strong style="color: ${pend > 0 ? '#0284C7' : '#15803D'}">${pend ? formatCurrency(pend) : 'PAID'}</strong></td>
                 </tr>
               `;
             }).join('')}

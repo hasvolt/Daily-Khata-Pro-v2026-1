@@ -17,7 +17,7 @@
     --theme-text-muted: #8BA4D0;
     --theme-text-dim: #5572A1;
     --theme-badge-text: #38BDF8;
-    --theme-btn-bg: #D97706;
+    --theme-btn-bg: #0284C7;
     --theme-btn-hover: #0EA5E9;
     --theme-btn-text: #FFFFFF;
   }
@@ -37,29 +37,29 @@
     --theme-text-muted: #8BA4D0;
     --theme-text-dim: #5572A1;
     --theme-badge-text: #38BDF8;
-    --theme-btn-bg: #D97706;
+    --theme-btn-bg: #0284C7;
     --theme-btn-hover: #0EA5E9;
     --theme-btn-text: #FFFFFF;
   }
 
   [data-theme="yellow"] {
-    --theme-primary: #FFC700;
-    --theme-primary-hover: #FFD233;
-    --theme-primary-dim: rgba(255, 199, 0, 0.16);
-    --theme-primary-border: rgba(255, 199, 0, 0.38);
-    --theme-glow: rgba(255, 199, 0, 0.22);
-    --theme-bg: #100E07;
-    --theme-surface: #1C190D;
-    --theme-card: #292413;
-    --theme-card-hover: #373019;
-    --theme-border: #4D431B;
-    --theme-text: #F8FAFC;
+    --theme-primary: #FFD200;
+    --theme-primary-hover: #E5BB00;
+    --theme-primary-dim: rgba(255, 210, 0, 0.25);
+    --theme-primary-border: rgba(255, 210, 0, 0.45);
+    --theme-glow: rgba(255, 210, 0, 0.35);
+    --theme-bg: #080705;
+    --theme-surface: rgba(30, 26, 16, 0.6);
+    --theme-card: rgba(30, 26, 16, 0.75);
+    --theme-card-hover: rgba(45, 39, 23, 0.85);
+    --theme-border: rgba(255, 210, 0, 0.15);
+    --theme-text: #FFFFFF;
     --theme-text-muted: #D1D5DB;
     --theme-text-dim: #9CA3AF;
-    --theme-badge-text: #FFC700;
-    --theme-btn-bg: #FFC700;
-    --theme-btn-hover: #FFD233;
-    --theme-btn-text: #120E02;
+    --theme-badge-text: #FFD200;
+    --theme-btn-bg: #FFD200;
+    --theme-btn-hover: #E5BB00;
+    --theme-btn-text: #141000;
   }
 
   [data-theme="orange"] {
@@ -183,11 +183,11 @@
   }
 
   [data-theme="light"] {
-    --theme-primary: #D97706;
-    --theme-primary-hover: #B45309;
-    --theme-primary-dim: rgba(217, 119, 6, 0.12);
-    --theme-primary-border: rgba(217, 119, 6, 0.35);
-    --theme-glow: rgba(217, 119, 6, 0.12);
+    --theme-primary: #0284C7;
+    --theme-primary-hover: #0369A1;
+    --theme-primary-dim: rgba(2, 132, 199, 0.12);
+    --theme-primary-border: rgba(2, 132, 199, 0.35);
+    --theme-glow: rgba(2, 132, 199, 0.12);
     --theme-bg: #F1F5F9;
     --theme-surface: #FFFFFF;
     --theme-card: #FFFFFF;
@@ -196,18 +196,18 @@
     --theme-text: #0F172A;
     --theme-text-muted: #475569;
     --theme-text-dim: #64748B;
-    --theme-badge-text: #D97706;
-    --theme-btn-bg: #D97706;
-    --theme-btn-hover: #B45309;
+    --theme-badge-text: #0284C7;
+    --theme-btn-bg: #0284C7;
+    --theme-btn-hover: #0369A1;
     --theme-btn-text: #FFFFFF;
   }
 
   [data-theme="white"] {
-    --theme-primary: #D97706;
-    --theme-primary-hover: #B45309;
-    --theme-primary-dim: rgba(217, 119, 6, 0.10);
-    --theme-primary-border: rgba(217, 119, 6, 0.30);
-    --theme-glow: rgba(217, 119, 6, 0.08);
+    --theme-primary: #2563EB;
+    --theme-primary-hover: #1D4ED8;
+    --theme-primary-dim: rgba(37, 99, 235, 0.10);
+    --theme-primary-border: rgba(37, 99, 235, 0.30);
+    --theme-glow: rgba(37, 99, 235, 0.08);
     --theme-bg: #FFFFFF;
     --theme-surface: #F8FAFC;
     --theme-card: #FFFFFF;
@@ -216,9 +216,9 @@
     --theme-text: #0F172A;
     --theme-text-muted: #475569;
     --theme-text-dim: #64748B;
-    --theme-badge-text: #B45309;
-    --theme-btn-bg: #D97706;
-    --theme-btn-hover: #B45309;
+    --theme-badge-text: #1D4ED8;
+    --theme-btn-bg: #2563EB;
+    --theme-btn-hover: #1D4ED8;
     --theme-btn-text: #FFFFFF;
   }
 
@@ -418,8 +418,8 @@
 [data-theme="white"] button.bg-\[\#EF4444\],
 [data-theme="light"] button.bg-\[\#10B981\],
 [data-theme="white"] button.bg-\[\#10B981\],
-[data-theme="light"] button.bg-\[\#D97706\],
-[data-theme="white"] button.bg-\[\#D97706\],
+[data-theme="light"] button.bg-\[\#0284C7\],
+[data-theme="white"] button.bg-\[\#0284C7\],
 [data-theme="light"] button.bg-\[\#2563EB\],
 [data-theme="white"] button.bg-\[\#2563EB\],
 [data-theme="light"] button.theme-btn-primary,
@@ -432,7 +432,7 @@
 /* High contrast accent color adjustments for Daylight */
 [data-theme="light"] .text-\[\#38BDF8\],
 [data-theme="white"] .text-\[\#38BDF8\] {
-  color: #D97706;
+  color: #0284C7;
 }
 
 [data-theme="light"] .text-\[\#10B981\],
@@ -444,7 +444,7 @@
 [data-theme="white"] .text-\[\#FFC700\],
 [data-theme="light"] .text-\[\#F59E0B\],
 [data-theme="white"] .text-\[\#F59E0B\] {
-  color: #D97706;
+  color: #0284C7;
 }
 
 [data-theme="light"] .text-\[\#F97316\],
@@ -647,7 +647,7 @@
 [data-theme="white"] .banking-card-3d .banking-card-date-box {
   background-color: #E0F2FE !important;
   border-color: #BAE6FD !important;
-  color: #D97706 !important;
+  color: #0284C7 !important;
 }
 
 [data-theme="light"] .banking-card-3d .banking-card-date,
@@ -735,7 +735,7 @@
 [data-theme="white"] select:focus,
 [data-theme="light"] textarea:focus,
 [data-theme="white"] textarea:focus {
-  border-color: var(--theme-primary, #D97706);
+  border-color: var(--theme-primary, #0284C7);
   box-shadow: 0 0 0 2px var(--theme-primary-dim, rgba(2, 132, 199, 0.15));
 }
 

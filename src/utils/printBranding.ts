@@ -72,7 +72,7 @@ export function getPrintWatermarkCSS(): string {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2.5px solid #D97706;
+      border-bottom: 2.5px solid #0284C7;
       padding-bottom: 12px;
       margin-bottom: 16px;
     }
@@ -130,7 +130,7 @@ export function getPrintWatermarkCSS(): string {
       color: #334155;
     }
     .brand-footer-link {
-      color: #D97706;
+      color: #0284C7;
       text-decoration: none;
       font-weight: 600;
     }
