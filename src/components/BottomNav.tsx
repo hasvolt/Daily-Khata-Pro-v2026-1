@@ -96,7 +96,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab, l
               }`}
             >
               {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-[var(--theme-primary,#38BDF8)] rounded-b-full shadow-[0_2px_8px_rgba(56,189,248,0.5)] animate-in fade-in zoom-in duration-300"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-[var(--theme-primary,#38BDF8)] rounded-b-full shadow-[0_2px_8px_var(--theme-glow,rgba(56,189,248,0.5))] animate-in fade-in zoom-in duration-300"></div>
               )}
               <div
                 className={`relative p-1 sm:p-2 rounded-lg sm:rounded-xl transition-all duration-300 ${

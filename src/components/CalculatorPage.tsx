@@ -1,10 +1,5 @@
-import {
-  getCachedMarketRates,
-  fetchLiveMarketRates,
-  subscribeMarketRates
-} from '../services/liveMarketApiService';
-import { getCurrencyConfig, getCurrentLanguage, formatCurrencyByLang } from "../utils/currencyConfig";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { getCurrencyConfig, getCurrentLanguage, formatCurrencyByLang } from "../utils/currencyConfig";
 import {
   Calculator,
   Layers,
@@ -17,7 +12,6 @@ import {
   ArrowRight,
   PlusCircle,
   MinusCircle,
-  Sparkles,
   ArrowLeft,
   Target,
   History,
@@ -45,7 +39,7 @@ import { formatCurrency, triggerHapticSound } from '../utils/khataCalculations';
 import { playKeypadSound, playIncomeSound, playDeleteSound } from '../utils/audioService';
 import { printCalculatorSlip, downloadCalculatorSlipHTML, CalcPrintParams } from '../utils/calculatorPrint';
 
-export type CalculatorViewType = 'standard' | 'currency' | 'gold' | 'emi' | 'sip' | 'funds' | 'gst' | 'discount' | 'inflation';
+export type CalculatorViewType = 'standard' | 'currency' | 'emi' | 'sip' | 'funds' | 'gst' | 'discount' | 'inflation';
 
 interface CalculatorPageProps {
   onBack: () => void;
@@ -213,10 +207,6 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
   const [wireTransferFeeInr, setWireTransferFeeInr] = useState<string>('0');
   const [tcsPercent, setTcsPercent] = useState<string>('0');
 
-  const [liveForexRates, setLiveForexRates] = useState<Record<string, any>>(() => {
-    return getCachedMarketRates()?.forex || {};
-  });
-
   const CURRENCY_CONFIGS: Record<string, { symbol: string; name: string; defaultRate: number; flag: string; country: string; region: 'gulf' | 'popular' | 'asia' | 'west' | 'other' }> = {
     INR: { symbol: '₹', name: 'Indian Rupee', defaultRate: 1.0, flag: '🇮🇳', country: 'India', region: 'popular' },
     USD: { symbol: '$', name: 'US Dollar', defaultRate: 83.92, flag: '🇺🇸', country: 'United States', region: 'popular' },
@@ -280,19 +270,9 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
     { from: 'INR', to: 'USD', label: 'INR ➔ USD' }
   ];
 
-  // Subscribe to live market rates
-  useEffect(() => {
-    const unsub = subscribeMarketRates((updatedRates) => {
-      if (updatedRates?.forex) {
-        setLiveForexRates(updatedRates.forex);
-      }
-    });
-    return () => unsub();
-  }, []);
-
   const getCurrencyInrRate = (currCode: string): number => {
     if (currCode === 'INR') return 1.0;
-    return liveForexRates?.[currCode]?.inrRate || CURRENCY_CONFIGS[currCode]?.defaultRate || 1.0;
+    return CURRENCY_CONFIGS[currCode]?.defaultRate || 1.0;
   };
 
   const fromInrRate = getCurrencyInrRate(fromCurrency);
@@ -323,18 +303,10 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
     setCurrencyCustomRate('');
   };
 
-  const handleSyncLiveRate = async () => {
+  const handleResetDefaultRate = () => {
     triggerHapticSound('click');
-    try {
-      const fresh = await fetchLiveMarketRates();
-      if (fresh?.forex) {
-        setLiveForexRates(fresh.forex);
-      }
-      setIsLiveRateSynced(true);
-      setCurrencyCustomRate('');
-    } catch {
-      // Fallback
-    }
+    setIsLiveRateSynced(true);
+    setCurrencyCustomRate('');
   };
 
   const currAmtNum = Math.max(0, parseFloat(currencyAmountInput) || 0);
@@ -352,40 +324,6 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
   const netInHandInrEquivalent = toCurrency === 'INR'
     ? (showRemittanceBreakdown ? netInHandAmount : grossConverted)
     : (showRemittanceBreakdown ? netInHandAmount : grossConverted) * toInrRate;
-
-  // --- 9. Gold & Silver Bullion State ---
-  const [metalType, setMetalType] = useState<'gold24' | 'gold22' | 'gold18' | 'silver'>('gold24');
-  const [metalWeightInput, setMetalWeightInput] = useState<string>('10');
-  const [metalWeightUnit, setMetalWeightUnit] = useState<'gm' | 'tola' | 'oz'>('gm');
-  const [metalRateInput, setMetalRateInput] = useState<string>('75850');
-  const [makingChargesPct, setMakingChargesPct] = useState<string>('8');
-  const [goldGstPct, setGoldGstPct] = useState<string>('3');
-
-  const METAL_CONFIGS = {
-    gold24: { label: 'Gold 24K (99.9% Pure Bullion)', rate: 75850, unit: '10 Grams' },
-    gold22: { label: 'Gold 22K (91.6% Hallmark Jewelry)', rate: 69530, unit: '10 Grams' },
-    gold18: { label: 'Gold 18K (75.0% Diamond/Fashion)', rate: 56890, unit: '10 Grams' },
-    silver: { label: 'Fine Silver (99.9% Bar / Coin)', rate: 91200, unit: '1 Kilogram' }
-  };
-
-  const handleSelectMetal = (m: 'gold24' | 'gold22' | 'gold18' | 'silver') => {
-    setMetalType(m);
-    setMetalRateInput(METAL_CONFIGS[m].rate.toString());
-  };
-
-  const rawWeight = Math.max(0, parseFloat(metalWeightInput) || 0);
-  const weightInGrams = metalWeightUnit === 'gm' ? rawWeight : metalWeightUnit === 'tola' ? rawWeight * 11.664 : rawWeight * 31.103;
-  const rateInputVal = Math.max(0, parseFloat(metalRateInput) || 0);
-  const ratePerGram = metalType === 'silver' ? rateInputVal / 1000 : rateInputVal / 10;
-  const metalBaseCost = weightInGrams * ratePerGram;
-  const makingPctNum = Math.max(0, parseFloat(makingChargesPct) || 0);
-  const makingChargeAmount = (metalBaseCost * makingPctNum) / 100;
-  const subtotalBeforeGst = metalBaseCost + makingChargeAmount;
-  const gstPctNum = Math.max(0, parseFloat(goldGstPct) || 0);
-  const bullionGstAmount = (subtotalBeforeGst * gstPctNum) / 100;
-  const grandBullionTotal = subtotalBeforeGst + bullionGstAmount;
-  const effectivePerGramCost = weightInGrams > 0 ? grandBullionTotal / weightInGrams : 0;
-
 
   // Copy helper
   const handleCopy = (text: string, keyId: string) => {
@@ -449,6 +387,50 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
     }
 
     playKeypadSound(val);
+
+    if (val === '±') {
+      const cur = parseFloat(stdLiveResult) || 0;
+      const negated = Math.round(-cur * 1000000) / 1000000;
+      const negStr = negated.toString();
+      setStdExpr(negStr);
+      setStdLiveResult(negStr);
+      justEvaluatedRef.current = true;
+      return;
+    }
+
+    if (val === '√') {
+      const cur = parseFloat(stdLiveResult) || 0;
+      if (cur < 0) return;
+      const sqrtVal = Math.round(Math.sqrt(cur) * 1000000) / 1000000;
+      const sqrtStr = sqrtVal.toString();
+      setStdExpr(sqrtStr);
+      setStdLiveResult(sqrtStr);
+      justEvaluatedRef.current = true;
+      return;
+    }
+
+    if (val === 'x²') {
+      const cur = parseFloat(stdLiveResult) || 0;
+      const sqVal = Math.round(cur * cur * 1000000) / 1000000;
+      const sqStr = sqVal.toString();
+      setStdExpr(sqStr);
+      setStdLiveResult(sqStr);
+      justEvaluatedRef.current = true;
+      return;
+    }
+
+    if (val === '(' || val === ')') {
+      justEvaluatedRef.current = false;
+      setStdExpr((prev) => {
+        const next = prev + val;
+        const evalRes = evaluateMath(next);
+        if (evalRes.result !== null) {
+          setStdLiveResult(evalRes.result.toString());
+        }
+        return next;
+      });
+      return;
+    }
 
     const isDigitOrDot = /^[0-9.]|00$/.test(val);
     const operators = ['+', '−', '-', '×', '*', '÷', '/', '%'];
@@ -551,6 +533,9 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
       } else if (e.key === '/') {
         e.preventDefault();
         handleKeypadPress('÷');
+      } else if (e.key === '(' || e.key === ')') {
+        e.preventDefault();
+        handleKeypadPress(e.key);
       } else if (e.key === '%') {
         e.preventDefault();
         handleKeypadPress('%');
@@ -741,7 +726,6 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
   const navTabs: { id: CalculatorViewType; label: string; hindi: string; icon: any }[] = [
     { id: 'standard', label: 'Standard Calc', hindi: 'साधारण कैलकुलेटर', icon: Calculator },
     { id: 'currency', label: 'Currency / Forex', hindi: 'मुद्रा विनिमय (Currency)', icon: DollarSign },
-    { id: 'gold', label: 'Gold & Silver', hindi: 'सोना व चांदी (24K/22K)', icon: Sparkles },
     { id: 'emi', label: 'Loan EMI', hindi: 'लोन EMI', icon: Landmark },
     { id: 'sip', label: 'SIP & Wealth', hindi: 'SIP वेल्थ', icon: TrendingUp },
     { id: 'funds', label: 'Smart Fund Split', hindi: 'स्मार्ट फंड विभाजन', icon: Layers },
@@ -793,25 +777,6 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
           { label: 'INR Equivalent', value: formatCurrency(netInHandInrEquivalent) }
         ],
         notes: `Calculated via Daily Khata Pro Universal Multi-Country Forex Engine. Cross Rate: 1 ${fromCurrency} = ${effectiveRate.toFixed(4)} ${toCurrency}`
-      };
-    }
-
-    if (activeTab === 'gold') {
-      return {
-        title: isHindi ? 'स्वर्ण व रजत आभूषण बिल गणना स्लिप' : 'Gold & Silver Bullion Calculation Slip',
-        type: 'Precious Metals Valuation',
-        mainResult: formatCurrency(grandBullionTotal),
-        resultLabel: isHindi ? 'कुल अनुमानित बिल राशि' : 'Total Estimated Bullion Bill',
-        items: [
-          { label: 'Metal & Purity', value: METAL_CONFIGS[metalType].label, isBold: true },
-          { label: 'Weight (Calculated)', value: rawWeight + ' ' + metalWeightUnit + ' (' + weightInGrams.toFixed(2) + ' grams)' },
-          { label: 'Base Metal Price', value: formatCurrency(metalBaseCost) },
-          { label: 'Making Charges (' + makingPctNum + '%)', value: formatCurrency(makingChargeAmount) },
-          { label: 'Bullion GST (' + gstPctNum + '%)', value: formatCurrency(bullionGstAmount) },
-          { label: 'Total Payable', value: formatCurrency(grandBullionTotal), isBold: true, isHighlight: true },
-          { label: 'Effective Rate / Gram', value: formatCurrency(effectivePerGramCost) }
-        ],
-        notes: 'Official hallmark benchmark estimates with GST'
       };
     }
 
@@ -1150,18 +1115,43 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
             </div>
           </div>
 
-          {/* LCD / OLED Display Screen with Guaranteed Stable Height */}
-          <div className={`p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg,#070E18)] border border-[var(--theme-border,#213E61)] shadow-inner space-y-1 text-right relative overflow-hidden flex flex-col justify-between ${
+          {/* LCD / OLED Display Screen with Guaranteed Stable Height & 1-Click Copy */}
+          <div className={`p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg,#070E18)] border border-[var(--theme-border,#213E61)] shadow-inner space-y-1 text-right relative overflow-hidden flex flex-col justify-between backdrop-blur-md ${
             calcScale === 'jumbo' ? 'min-h-[155px]' : calcScale === 'large' ? 'min-h-[140px]' : 'min-h-[120px]'
           }`}>
             <div className="flex items-center justify-between text-[var(--theme-text-dim,#94A3B8)] min-h-[22px]">
-              {memoryVal !== 0 ? (
-                <span className="text-[11px] font-mono font-bold text-[var(--theme-primary,#38BDF8)] bg-[var(--theme-primary,#38BDF8)]/15 px-2 py-0.5 rounded-md border border-[var(--theme-primary,#38BDF8)]/30 shrink-0">
-                  MEMORY: {memoryVal}
-                </span>
-              ) : (
-                <span className="text-[11px] font-mono text-[#64748B] shrink-0">CALC READY</span>
-              )}
+              <div className="flex items-center gap-1.5">
+                {memoryVal !== 0 ? (
+                  <span className="text-[11px] font-mono font-bold text-[var(--theme-primary,#38BDF8)] bg-[var(--theme-primary,#38BDF8)]/15 px-2 py-0.5 rounded-md border border-[var(--theme-primary,#38BDF8)]/30 shrink-0">
+                    MEMORY: {memoryVal}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-mono text-[#64748B] shrink-0 font-semibold">CALC READY</span>
+                )}
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (stdLiveResult && stdLiveResult !== '0') {
+                      handleCopy(stdLiveResult, 'calc-res');
+                    }
+                  }}
+                  className="px-2 py-0.5 rounded-md bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-[10.5px] font-mono text-[var(--theme-text-dim,#94A3B8)] hover:text-[var(--theme-primary,#38BDF8)] hover:border-[var(--theme-primary,#38BDF8)] transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Copy Result"
+                >
+                  {copiedKey === 'calc-res' ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      <span className="text-emerald-400 font-bold">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
               <div className={`font-mono text-[var(--theme-text-dim,#94A3B8)] overflow-x-auto whitespace-nowrap custom-scrollbar pl-3 font-semibold ${
                 calcScale === 'jumbo' ? 'text-[17px]' : calcScale === 'large' ? 'text-[16px]' : 'text-[14px]'
@@ -1171,13 +1161,20 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
             </div>
 
             {/* Main Result Number */}
-            <div className={`font-mono font-extrabold text-[var(--theme-primary,#38BDF8)] tracking-tight truncate select-all py-0.5 ${
-              calcScale === 'jumbo'
-                ? 'text-[44px] sm:text-[58px] md:text-[68px] leading-tight'
-                : calcScale === 'large'
-                ? 'text-[38px] sm:text-[50px] md:text-[60px] leading-tight'
-                : 'text-[28px] sm:text-[34px] md:text-[38px] leading-tight'
-            }`}>
+            <div 
+              onClick={() => {
+                if (stdLiveResult && stdLiveResult !== '0') {
+                  handleCopy(stdLiveResult, 'calc-res');
+                }
+              }}
+              title="Click to copy result"
+              className={`font-mono font-extrabold text-[var(--theme-primary,#38BDF8)] tracking-tight truncate select-all py-0.5 cursor-pointer hover:opacity-95 active:scale-[0.99] transition-transform ${
+                calcScale === 'jumbo'
+                  ? 'text-[44px] sm:text-[58px] md:text-[68px] leading-tight'
+                  : calcScale === 'large'
+                  ? 'text-[38px] sm:text-[50px] md:text-[60px] leading-tight'
+                  : 'text-[28px] sm:text-[34px] md:text-[38px] leading-tight'
+              }`}>
               {privacyMask ? `${getCurrencyConfig(getCurrentLanguage()).symbol} ****` : (stdLiveResult || '0')}
             </div>
 
@@ -1224,7 +1221,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                       setStdLiveResult(item.res);
                       triggerHapticSound('click');
                     }}
-                    className="flex justify-between items-center p-2 rounded-xl hover:bg-[var(--theme-card,#132438)] transition-colors cursor-pointer text-[var(--theme-text-muted,#CBD5E1)] border border-transparent hover:border-[var(--theme-border,#213E61)] touch-manipulation"
+                    className="flex justify-between items-center p-2 rounded-xl hover:bg-[var(--theme-card,#132438)] transition-colors cursor-pointer text-[var(--theme-text-muted,#CBD5E1)] border border-transparent hover:border-[var(--theme-border,#213E61)] touch-manipulation active:scale-[0.98]"
                   >
                     <span className="text-[var(--theme-text-dim,#94A3B8)] truncate max-w-[200px]">{item.expr}</span>
                     <span className="font-bold text-[var(--theme-primary,#38BDF8)] text-[14px]">= {item.res}</span>
@@ -1234,7 +1231,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
             </div>
           )}
 
-          {/* Memory Functions Row (Large & Touch-Friendly) */}
+          {/* Memory Functions Row (Large & Touch-Friendly with Crunchy Feedback) */}
           <div className="grid grid-cols-4 gap-2 text-center font-mono font-bold touch-manipulation">
             <button
               type="button"
@@ -1243,7 +1240,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 setMemoryVal(0);
                 triggerHapticSound('click');
               }}
-              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-text-dim,#94A3B8)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-colors duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:brightness-125 ${
+              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-text-dim,#94A3B8)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-all duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
                 calcScale === 'jumbo' ? 'py-3.5 text-[15px]' : calcScale === 'large' ? 'py-3 text-[13.5px]' : 'py-2 text-[11px]'
               }`}
             >
@@ -1256,7 +1253,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 handleKeypadPress(memoryVal.toString());
                 triggerHapticSound('click');
               }}
-              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-text-muted,#CBD5E1)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-colors duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:brightness-125 ${
+              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-text-muted,#CBD5E1)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-all duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
                 calcScale === 'jumbo' ? 'py-3.5 text-[15px]' : calcScale === 'large' ? 'py-3 text-[13.5px]' : 'py-2 text-[11px]'
               }`}
             >
@@ -1270,7 +1267,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 setMemoryVal((prev) => prev + cur);
                 triggerHapticSound('click');
               }}
-              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-primary,#38BDF8)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-colors duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:brightness-125 ${
+              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-primary,#38BDF8)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-all duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
                 calcScale === 'jumbo' ? 'py-3.5 text-[15px]' : calcScale === 'large' ? 'py-3 text-[13.5px]' : 'py-2 text-[11px]'
               }`}
             >
@@ -1284,7 +1281,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 setMemoryVal((prev) => prev - cur);
                 triggerHapticSound('click');
               }}
-              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[#EF4444] border border-[var(--theme-border,#213E61)] hover:border-[#EF4444] transition-colors duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:brightness-125 ${
+              className={`rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-bg,#070E18)] text-[#EF4444] border border-[var(--theme-border,#213E61)] hover:border-[#EF4444] transition-all duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
                 calcScale === 'jumbo' ? 'py-3.5 text-[15px]' : calcScale === 'large' ? 'py-3 text-[13.5px]' : 'py-2 text-[11px]'
               }`}
             >
@@ -1292,12 +1289,35 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
             </button>
           </div>
 
-          {/* Keypad Grid (Stable Touch targets, 0 latency, 0 jumping) */}
+          {/* Scientific Functions Row (Crunchy & Precise) */}
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center font-mono font-bold touch-manipulation">
+            {[
+              { label: '(', val: '(' },
+              { label: ')', val: ')' },
+              { label: '√x', val: '√' },
+              { label: 'x²', val: 'x²' },
+              { label: '±', val: '±' },
+            ].map((sf, sIdx) => (
+              <button
+                key={sIdx}
+                type="button"
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={() => handleKeypadPress(sf.val)}
+                className={`rounded-xl bg-[var(--theme-surface,#0E1A29)]/80 hover:bg-[var(--theme-bg,#070E18)] text-[var(--theme-primary,#38BDF8)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] transition-all duration-75 cursor-pointer shadow-xs touch-manipulation select-none active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
+                  calcScale === 'jumbo' ? 'py-2.5 text-[14px]' : calcScale === 'large' ? 'py-2 text-[12.5px]' : 'py-1.5 text-[11px]'
+                }`}
+              >
+                {sf.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Keypad Grid (Stable Touch targets, 0 latency, tactile crunchy feedback) */}
           <div className={`grid grid-cols-4 touch-manipulation select-none ${
             calcScale === 'jumbo' ? 'gap-3 sm:gap-4' : calcScale === 'large' ? 'gap-2.5 sm:gap-3.5' : 'gap-1.5 sm:gap-2'
           }`}>
             {[
-              { label: 'C', val: 'C', cls: 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]/40 hover:bg-[#EF4444]/30' },
+              { label: 'C', val: 'C', cls: 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]/40 hover:bg-[#EF4444]/30 active:bg-[#EF4444]/40' },
               { label: '⌫', val: '⌫', cls: 'bg-[var(--theme-surface,#0E1A29)] text-[#F59E0B] border-[var(--theme-border,#213E61)] hover:bg-[var(--theme-bg,#070E18)]' },
               { label: '%', val: '%', cls: 'bg-[var(--theme-surface,#0E1A29)] text-[#38BDF8] border-[var(--theme-border,#213E61)] hover:bg-[var(--theme-bg,#070E18)]' },
               { label: '÷', val: '÷', cls: 'bg-[var(--theme-primary-dim,rgba(56,189,248,0.22))] text-[var(--theme-primary,#38BDF8)] border-[var(--theme-primary-border,rgba(56,189,248,0.5))] font-black' },
@@ -1320,7 +1340,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
               { label: '0', val: '0' },
               { label: '00', val: '00' },
               { label: '.', val: '.' },
-              { label: '=', val: '=', cls: 'bg-[var(--theme-primary,#38BDF8)] text-[var(--theme-btn-text,#040D17)] font-black shadow-lg border-transparent hover:brightness-115 active:brightness-90' }
+              { label: '=', val: '=', cls: 'bg-[var(--theme-primary,#38BDF8)] text-[var(--theme-btn-text,#040D17)] font-black shadow-lg border-transparent hover:brightness-115 active:scale-[0.95] active:translate-y-0.5 active:brightness-95' }
             ].map((btn, idx) => {
               const heightClass =
                 calcScale === 'jumbo'
@@ -1338,7 +1358,7 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                     e.preventDefault();
                   }}
                   onClick={() => handleKeypadPress(btn.val)}
-                  className={`${heightClass} font-mono font-bold flex items-center justify-center transition-colors duration-75 cursor-pointer touch-manipulation select-none shadow-sm border active:brightness-125 ${
+                  className={`${heightClass} font-mono font-bold flex items-center justify-center transition-all duration-75 cursor-pointer touch-manipulation select-none shadow-sm border active:scale-[0.95] active:translate-y-0.5 active:brightness-125 ${
                     btn.cls ||
                     'bg-[var(--theme-bg,#070E18)] text-[var(--theme-text,#F8FAFC)] border-[var(--theme-border,#213E61)] hover:bg-[var(--theme-surface,#0E1A29)] hover:border-[var(--theme-primary,#38BDF8)]/50 active:bg-[var(--theme-surface,#0E1A29)]'
                   }`}
@@ -2603,12 +2623,12 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
-                  onClick={handleSyncLiveRate}
+                  onClick={handleResetDefaultRate}
                   className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-[11px] sm:text-xs font-mono font-bold text-emerald-400 hover:bg-emerald-500/25 transition-all cursor-pointer flex items-center gap-1"
-                  title="Sync Live Exchange Rate from API"
+                  title="Reset to Standard Forex Benchmark Rate"
                 >
                   <RefreshCw className="w-3 h-3" />
-                  <span>Sync</span>
+                  <span>Reset</span>
                 </button>
                 <button
                   type="button"
@@ -2954,10 +2974,13 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 </label>
                 <button
                   type="button"
-                  onClick={handleSyncLiveRate}
+                  onClick={() => {
+                    setCurrencyCustomRate('');
+                    setIsLiveRateSynced(true);
+                  }}
                   className="text-[10px] sm:text-[10.5px] text-emerald-400 hover:underline font-mono shrink-0 ml-1"
                 >
-                  Reset Live
+                  Reset Benchmark
                 </button>
               </div>
               <input
@@ -3222,232 +3245,6 @@ export const CalculatorPage: React.FC<CalculatorPageProps> = ({
                 <span>
                   {isHindi ? `आय में जोड़ें (₹${Math.round(netInHandInrEquivalent).toLocaleString('en-IN')})` : `Apply as Income (₹${Math.round(netInHandInrEquivalent).toLocaleString('en-IN')})`}
                 </span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 3. GOLD & SILVER BULLION VALUATION */}
-      {/* ========================================================================= */}
-      {activeTab === 'gold' && (
-        <div className="mx-auto max-w-2xl bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] rounded-3xl p-4 sm:p-6 shadow-2xl space-y-5 animate-in fade-in duration-150 text-left">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--theme-border,#213E61)]/70 pb-3 flex-wrap gap-2">
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-[var(--theme-text,#F8FAFC)] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <span>{isHindi ? 'स्वर्ण व रजत आभूषण कैलकुलेटर' : 'Gold & Silver Bullion Valuation'}</span>
-              </h2>
-              <p className="text-xs text-[var(--theme-text-dim,#94A3B8)] mt-0.5">
-                {isHindi ? '24K, 22K हॉलमार्क सोना व चांदी: मेकिंग चार्ज, 3% GST एवं प्रति ग्राम शुद्ध दर' : '24K pure bullion, 22K hallmark jewelry & silver with making charges, 3% GST & itemized billing'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handlePrintCurrent}
-                className="px-2.5 py-1.5 rounded-xl bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-xs font-mono text-[var(--theme-text-muted,#CBD5E1)] hover:text-amber-400 hover:border-amber-400 transition-all cursor-pointer flex items-center gap-1.5"
-                title="Print Bullion Slip"
-              >
-                <Printer className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Print Slip</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Metal & Purity Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)] block">
-              {isHindi ? 'धातु व शुद्धता चुनें' : 'Select Metal & Purity Standard'}
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {(['gold24', 'gold22', 'gold18', 'silver'] as const).map((mKey) => {
-                const item = METAL_CONFIGS[mKey];
-                const isChosen = metalType === mKey;
-                return (
-                  <button
-                    key={mKey}
-                    type="button"
-                    onClick={() => {
-                      handleSelectMetal(mKey);
-                      triggerHapticSound('click');
-                    }}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      isChosen
-                        ? 'bg-amber-500/15 border-amber-500 text-amber-300 shadow-sm ring-1 ring-amber-400/40'
-                        : 'bg-[var(--theme-surface,#0E1A29)] border-[var(--theme-border,#213E61)] text-[var(--theme-text-muted,#CBD5E1)] hover:border-amber-500/40'
-                    }`}
-                  >
-                    <div className="text-xs font-black text-[var(--theme-text,#F8FAFC)] truncate">
-                      {mKey === 'gold24' ? '🪙 Gold 24K' : mKey === 'gold22' ? '💍 Gold 22K (916)' : mKey === 'gold18' ? '✨ Gold 18K' : '🥈 Silver (999)'}
-                    </div>
-                    <div className="text-[10.5px] font-mono text-amber-400 mt-1 font-bold">
-                      ₹{item.rate.toLocaleString('en-IN')}
-                    </div>
-                    <div className="text-[9.5px] text-[var(--theme-text-dim,#94A3B8)] font-mono mt-0.5">
-                      per {item.unit}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Weight and Unit Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)] block mb-1.5">
-                {isHindi ? 'वज़न (Weight)' : 'Metal Weight'}
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={metalWeightInput}
-                  onChange={(e) => setMetalWeightInput(e.target.value)}
-                  placeholder="10"
-                  className="flex-1 bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text,#F8FAFC)] focus:outline-none focus:border-amber-500 transition-all"
-                />
-                <div className="flex items-center bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] p-1 rounded-xl gap-1">
-                  {(['gm', 'tola', 'oz'] as const).map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => setMetalWeightUnit(u)}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                        metalWeightUnit === u
-                          ? 'bg-amber-400 text-slate-950 shadow-xs'
-                          : 'text-[var(--theme-text-dim,#94A3B8)] hover:text-white'
-                      }`}
-                    >
-                      {u === 'gm' ? 'Grams' : u === 'tola' ? 'Tola' : 'Oz'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="text-[10px] text-[var(--theme-text-dim,#94A3B8)] font-mono mt-1">
-                Converted pure weight: <span className="text-amber-400 font-bold">{weightInGrams.toFixed(2)} grams</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)] block mb-1.5">
-                {metalType === 'silver' ? 'Rate / 1 KG (₹)' : 'Rate / 10 Grams (₹)'}
-              </label>
-              <input
-                type="number"
-                value={metalRateInput}
-                onChange={(e) => setMetalRateInput(e.target.value)}
-                placeholder="75850"
-                className="w-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-amber-400 focus:outline-none focus:border-amber-500 transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Charges Grid: Making Charges & GST */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)]">
-                  {isHindi ? 'मेकिंग चार्ज (Making Charges %)' : 'Making / Craftsmanship (%)'}
-                </label>
-                <div className="flex items-center gap-1 text-[10px] font-mono text-amber-400">
-                  {[0, 6, 8, 12].map(pct => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setMakingChargesPct(pct.toString())}
-                      className="px-1.5 py-0.5 rounded bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-amber-400"
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <input
-                type="number"
-                step="0.5"
-                value={makingChargesPct}
-                onChange={(e) => setMakingChargesPct(e.target.value)}
-                placeholder="8"
-                className="w-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text,#F8FAFC)] focus:outline-none focus:border-amber-500 transition-all"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)]">
-                  {isHindi ? 'जीएसटी (GST %)' : 'Bullion GST Tax (%)'}
-                </label>
-                <span className="text-[10px] font-mono text-emerald-400">Govt Mandate: 3%</span>
-              </div>
-              <input
-                type="number"
-                step="0.5"
-                value={goldGstPct}
-                onChange={(e) => setGoldGstPct(e.target.value)}
-                placeholder="3"
-                className="w-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text,#F8FAFC)] focus:outline-none focus:border-amber-500 transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Itemized Billing Breakdown Box */}
-          <div className="p-4 rounded-2xl bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] space-y-2.5">
-            <div className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-dim,#94A3B8)] border-b border-[var(--theme-border,#213E61)]/70 pb-2 flex items-center justify-between">
-              <span>{isHindi ? 'आभूषण बिल विवरण (Invoice Breakdown)' : 'Jewelry Bill Invoice Breakdown'}</span>
-              <span className="font-mono text-amber-400 font-bold">1g = ₹{effectivePerGramCost.toFixed(1)} net</span>
-            </div>
-
-            <div className="space-y-1.5 text-xs font-mono">
-              <div className="flex items-center justify-between text-[var(--theme-text-muted,#CBD5E1)]">
-                <span>Base Metal Cost ({weightInGrams.toFixed(2)}g @ ₹{ratePerGram.toFixed(1)}/g):</span>
-                <span className="font-bold text-[var(--theme-text,#F8FAFC)]">{formatCurrency(metalBaseCost)}</span>
-              </div>
-              <div className="flex items-center justify-between text-[var(--theme-text-muted,#CBD5E1)]">
-                <span>Making Charges ({makingPctNum}%):</span>
-                <span className="font-bold text-amber-300">+{formatCurrency(makingChargeAmount)}</span>
-              </div>
-              <div className="flex items-center justify-between text-[var(--theme-text-muted,#CBD5E1)]">
-                <span>Bullion GST Tax ({gstPctNum}%):</span>
-                <span className="font-bold text-sky-400">+{formatCurrency(bullionGstAmount)}</span>
-              </div>
-            </div>
-
-            <div className="pt-2.5 border-t border-[var(--theme-border,#213E61)] flex items-baseline justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text,#F8FAFC)]">
-                {isHindi ? 'कुल देय राशि (Total Payable):' : 'Grand Total Payable:'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black font-mono text-amber-400">
-                {formatCurrency(grandBullionTotal)}
-              </span>
-            </div>
-          </div>
-
-          {/* Action Row */}
-          <div className="flex items-center gap-2 pt-1 flex-wrap">
-            <button
-              type="button"
-              onClick={() => {
-                const text = METAL_CONFIGS[metalType].label + ' (' + rawWeight + metalWeightUnit + ') Total: ' + formatCurrency(grandBullionTotal) + ' (Making: ' + formatCurrency(makingChargeAmount) + ', GST: ' + formatCurrency(bullionGstAmount) + ')';
-                handleCopy(text, 'gold-copy');
-              }}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-[var(--theme-surface,#0E1A29)] hover:bg-[var(--theme-border,#213E61)]/40 border border-[var(--theme-border,#213E61)] text-xs font-bold text-[var(--theme-text,#F8FAFC)] flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              {copiedKey === 'gold-copy' ? <Check className="w-4 h-4 text-amber-400" /> : <Copy className="w-4 h-4" />}
-              <span>{copiedKey === 'gold-copy' ? 'Copied to Clipboard!' : 'Copy Bullion Summary'}</span>
-            </button>
-
-            {onApplyToExpense && (
-              <button
-                type="button"
-                onClick={() => onApplyToExpense(Math.round(grandBullionTotal))}
-                className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
-              >
-                <MinusCircle className="w-4 h-4" />
-                <span>Add as Expense (₹{Math.round(grandBullionTotal).toLocaleString('en-IN')})</span>
               </button>
             )}
           </div>

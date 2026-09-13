@@ -25,23 +25,15 @@ import {
   Flame,
   Filter,
   Layers,
-  ArrowUpRight,
-  ArrowDownRight,
   Printer,
   ChevronRight,
   X,
   Mail,
   SlidersHorizontal,
-  RefreshCw,
-  DollarSign
+  Copy,
+  Info,
+  Check
 } from 'lucide-react';
-import {
-  subscribeMarketRates,
-  fetchLiveMarketRates,
-  getCachedMarketRates,
-  getIndianMarketStatus,
-  LiveMarketRates
-} from '../services/liveMarketApiService';
 import { AppLanguage } from '../types';
 import {
   LIVE_MARKET_INDICES,
@@ -89,52 +81,6 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [breakingIndex, setBreakingIndex] = useState(0);
-  const [isRefreshingRates, setIsRefreshingRates] = useState(false);
-  const [liveRates, setLiveRates] = useState<LiveMarketRates>(getCachedMarketRates());
-  const [marketStatus, setMarketStatus] = useState(getIndianMarketStatus());
-
-  useEffect(() => {
-    // Initial fetch on mount
-    fetchLiveMarketRates().then((rates) => {
-      setLiveRates(rates);
-      setMarketStatus(getIndianMarketStatus());
-    });
-
-    // Subscribe to rate updates
-    const unsubscribe = subscribeMarketRates((newRates) => {
-      setLiveRates(newRates);
-      setMarketStatus(getIndianMarketStatus());
-    });
-
-    // Auto-refresh interval every 60s
-    const interval = setInterval(() => {
-      fetchLiveMarketRates().then((rates) => {
-        setLiveRates(rates);
-        setMarketStatus(getIndianMarketStatus());
-      });
-    }, 60000);
-
-    return () => {
-      unsubscribe();
-      clearInterval(interval);
-    };
-  }, []);
-
-  const [lastRatesUpdate, setLastRatesUpdate] = useState('Just now');
-
-  const handleRefreshRates = async () => {
-    setIsRefreshingRates(true);
-    try {
-      const updated = await fetchLiveMarketRates();
-      setLiveRates(updated);
-      setMarketStatus(getIndianMarketStatus());
-      setLastRatesUpdate(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    } catch (err) {
-      console.error('Refresh rates failed', err);
-    } finally {
-      setIsRefreshingRates(false);
-    }
-  };
 
   const isHindi = language === 'hi' || language === 'hinglish';
 
@@ -269,13 +215,13 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
 
   return (
     <div className="min-h-screen bg-[var(--theme-bg,#070E18)] text-[var(--theme-text,#F8FAFC)] pb-24 font-sans selection:bg-[var(--theme-primary,#38BDF8)] selection:text-black">
-      {/* 1. Live Market Indices Ticker Strip (Universal: Mobile & Desktop) */}
+      {/* 1. Verified Macroeconomic Indicators Ticker Strip (Universal: Mobile & Desktop) */}
       <header className="block bg-[var(--theme-surface,#0E1A29)] border-b border-[var(--theme-border,#213E61)]/80 text-[11px] overflow-x-auto no-scrollbar py-2 px-3 sticky top-0 z-30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 shrink-0 pr-3 border-r border-[var(--theme-border,#213E61)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-mono font-bold tracking-wider uppercase text-[10px] text-[var(--theme-text-dim,#94A3B8)]">
-              {isHindi ? 'लाइव भाव' : 'LIVE RATES'}
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-mono font-bold tracking-wider uppercase text-[10px] text-emerald-400">
+              {isHindi ? 'सत्यापित मानक' : 'BENCHMARKS'}
             </span>
           </div>
 
@@ -283,17 +229,8 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
             {LIVE_MARKET_INDICES.map(idx => (
               <div key={idx.symbol} className="flex items-center gap-1.5 font-mono text-[11.5px]">
                 <span className="font-bold text-[var(--theme-text,#F8FAFC)]">{idx.symbol}</span>
-                <span className="text-[var(--theme-text-muted,#94A3B8)]">{idx.value}</span>
-                <span
-                  className={`flex items-center text-[10.5px] font-bold ${
-                    idx.isPositive ? 'text-emerald-400' : 'text-rose-400'
-                  }`}
-                >
-                  {idx.isPositive ? (
-                    <ArrowUpRight className="w-3 h-3 inline" />
-                  ) : (
-                    <ArrowDownRight className="w-3 h-3 inline" />
-                  )}
+                <span className="text-[var(--theme-primary,#38BDF8)] font-semibold">{idx.value}</span>
+                <span className="text-[10.5px] font-medium text-[var(--theme-text-dim,#94A3B8)] bg-white/5 px-1.5 py-0.2 rounded">
                   {idx.change}
                 </span>
               </div>
@@ -382,265 +319,146 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
             </div>
           </div>
 
-          {/* Live Market & Equity Indices (Sensex & Nifty 50) Command Center */}
+          {/* Key Macroeconomic Indicators & Policy Benchmarks */}
           <div className="mt-4 pt-3.5 border-t border-[var(--theme-border,#213E61)]/70 space-y-3">
-            {/* Live API Feed Header & Status Bar */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10.5px] font-bold font-mono text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>{isHindi ? 'लाइव API कनेक्टेड' : 'Live API Connected'}</span>
+                <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold font-mono text-emerald-400">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isHindi ? 'सत्यापित नीतिगत व नियामक मानक' : 'Verified Policy & Regulatory Benchmarks'}</span>
                 </span>
-                <span className="text-[10px] text-[var(--theme-text-dim,#94A3B8)] font-mono hidden sm:inline">
-                  Feed: {liveRates.apiSource} ({liveRates.latencyMs}ms)
-                </span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md font-mono ${
-                  marketStatus.isOpen ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'
-                }`}>
-                  {isHindi ? marketStatus.textHi : marketStatus.label}
+                <span className="text-[10.5px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
+                  {isHindi ? 'स्रोत: आरबीआई व वित्त मंत्रालय बुलेटिन' : 'Source: RBI, MoF & GST Council Official Gazettes'}
                 </span>
               </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[var(--theme-text-dim,#64748B)] font-mono">
-                  Synced: {lastRatesUpdate}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleRefreshRates}
-                  disabled={isRefreshingRates}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-primary,#38BDF8)] text-[11px] font-mono text-[var(--theme-text,#F8FAFC)] hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-xs"
-                  title="Refresh Live API Feeds"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 text-[var(--theme-primary,#38BDF8)] ${isRefreshingRates ? 'animate-spin' : ''}`} />
-                  <span>{isHindi ? 'रिफ्रेश करें' : 'Refresh Feed'}</span>
-                </button>
-              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] text-sky-400 font-bold">
+                {isHindi ? 'नियमित रूप से सत्यापित' : 'Statutorily Verified'}
+              </span>
             </div>
 
-            {/* Indian Benchmark Indices: NSE NIFTY 50 & BSE SENSEX Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* NIFTY 50 Card */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-emerald-500/40 transition-all shadow-md">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                    <span className="text-xs sm:text-sm font-black font-mono tracking-wider text-[var(--theme-text,#F8FAFC)]">
-                      NSE NIFTY 50
+            {/* 4 Pillars of Real Financial & Regulatory Information */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+              {/* Pillar 1: RBI Benchmark Policy */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-sky-400/50 transition-all shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-sky-400 font-mono tracking-wide">
+                      {isHindi ? 'आरबीआई रेपो दर' : 'RBI REPO RATE'}
                     </span>
-                    <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-300 font-mono">
-                      Benchmark Index
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-300">
+                      MPC Policy
                     </span>
                   </div>
-                  <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-lg flex items-center gap-0.5 ${
-                    liveRates.nifty50.change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
-                  }`}>
-                    {liveRates.nifty50.change >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                    <span>{liveRates.nifty50.change >= 0 ? '+' : ''}{liveRates.nifty50.change} ({liveRates.nifty50.changePercent}%)</span>
-                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
+                      6.50%
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                      Neutral
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
+                    {isHindi
+                      ? 'ऋण व बैंक ब्याज दरों का केंद्रीय बेंचमार्क। स्टैंडिंग डिपॉजिट सुविधा (SDF): 6.25%।'
+                      : 'Anchors commercial lending & bank interest. Standing Deposit Facility (SDF) at 6.25%.'}
+                  </p>
                 </div>
-
-                <div className="mt-2 flex items-baseline justify-between">
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--theme-text,#F8FAFC)] tracking-tight">
-                    {liveRates.nifty50.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <div className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    Prev Close: {liveRates.nifty50.prevClose.toLocaleString('en-IN')}
-                  </div>
-                </div>
-
-                {/* Day Range Bar */}
-                <div className="mt-2.5 space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span>Day Low: {liveRates.nifty50.low.toLocaleString('en-IN')}</span>
-                    <span>Day High: {liveRates.nifty50.high.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-[var(--theme-bg,#070E18)] overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-500 via-sky-400 to-emerald-400 rounded-full"
-                      style={{
-                        width: `${Math.min(100, Math.max(10, ((liveRates.nifty50.value - liveRates.nifty50.low) / Math.max(1, liveRates.nifty50.high - liveRates.nifty50.low)) * 100))}%`
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-[9.5px] text-[var(--theme-text-dim,#64748B)] font-mono pt-0.5">
-                    <span>52W Low: {liveRates.nifty50.week52Low.toLocaleString('en-IN')}</span>
-                    <span>P/E: {liveRates.nifty50.peRatio}</span>
-                    <span>52W High: {liveRates.nifty50.week52High.toLocaleString('en-IN')}</span>
-                  </div>
+                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
+                  <span>MSF: 6.75%</span>
+                  <span className="text-emerald-400 font-bold">Guarded</span>
                 </div>
               </div>
 
-              {/* SENSEX Card */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-emerald-500/40 transition-all shadow-md">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                    <span className="text-xs sm:text-sm font-black font-mono tracking-wider text-[var(--theme-text,#F8FAFC)]">
-                      BSE SENSEX
+              {/* Pillar 2: Retail Inflation & Sovereign Yield */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-emerald-400 font-mono tracking-wide">
+                      {isHindi ? 'खुदरा मुद्रास्फीति (CPI)' : 'CPI INFLATION'}
                     </span>
-                    <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300 font-mono">
-                      30 Bluechips
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300">
+                      Target 4±2%
                     </span>
                   </div>
-                  <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-lg flex items-center gap-0.5 ${
-                    liveRates.sensex.change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
-                  }`}>
-                    {liveRates.sensex.change >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                    <span>{liveRates.sensex.change >= 0 ? '+' : ''}{liveRates.sensex.change} ({liveRates.sensex.changePercent}%)</span>
-                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
+                      4.20%
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                      In-Band
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
+                    {isHindi
+                      ? 'उपभोक्ता मूल्य सूचकांक आरबीआई के 4% लक्ष्य दायरे में। 10-वर्षीय सरकारी बॉन्ड यील्ड: 6.84%।'
+                      : 'Consumer price index securely within RBI tolerance corridor. 10Y Sovereign G-Sec at 6.84%.'}
+                  </p>
                 </div>
-
-                <div className="mt-2 flex items-baseline justify-between">
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--theme-text,#F8FAFC)] tracking-tight">
-                    {liveRates.sensex.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <div className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    Prev Close: {liveRates.sensex.prevClose.toLocaleString('en-IN')}
-                  </div>
-                </div>
-
-                {/* Day Range Bar */}
-                <div className="mt-2.5 space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span>Day Low: {liveRates.sensex.low.toLocaleString('en-IN')}</span>
-                    <span>Day High: {liveRates.sensex.high.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-[var(--theme-bg,#070E18)] overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-400 rounded-full"
-                      style={{
-                        width: `${Math.min(100, Math.max(10, ((liveRates.sensex.value - liveRates.sensex.low) / Math.max(1, liveRates.sensex.high - liveRates.sensex.low)) * 100))}%`
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-[9.5px] text-[var(--theme-text-dim,#64748B)] font-mono pt-0.5">
-                    <span>52W Low: {liveRates.sensex.week52Low.toLocaleString('en-IN')}</span>
-                    <span>Advances: {liveRates.sensex.advances}</span>
-                    <span>52W High: {liveRates.sensex.week52High.toLocaleString('en-IN')}</span>
-                  </div>
+                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
+                  <span>FX Reserves: $680B+</span>
+                  <span className="text-sky-400 font-bold">Record High</span>
                 </div>
               </div>
-            </div>
 
-            {/* Quick Strip: Bank Nifty, India VIX, Bullion (Gold/Silver), Global Forex */}
-            <div className="space-y-1.5">
-              <div className="text-[11px] font-bold text-[var(--theme-text-dim,#94A3B8)] uppercase tracking-wider font-mono flex items-center justify-between">
-                <span>{isHindi ? 'कमोडिटी, बुलियन व लाइव फॉरेक्स भाव' : 'Live Bullion, Forex & Macro Feeds'}</span>
-                <span className="text-[10px] text-emerald-400 font-mono">Continuous Stream</span>
+              {/* Pillar 3: MSME 45-Day Payment Mandate */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-amber-400/50 transition-all shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-amber-400 font-mono tracking-wide">
+                      {isHindi ? 'एमएसएमई 45-दिन नियम' : 'SEC 43B(h) RULE'}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300">
+                      Statutory
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
+                      45 Days
+                    </span>
+                    <span className="text-[11px] font-mono text-amber-400 font-bold">
+                      Strict Cap
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
+                    {isHindi
+                      ? 'एमएसएमई को 45 दिनों में भुगतान न करने पर खरीदार की आयकर छूट रद्द। 3 गुना चक्रवृद्धि ब्याज दंड।'
+                      : 'Buyers withholding MSME payment past 45 days forfeit tax deductions under Income Tax Act.'}
+                  </p>
+                </div>
+                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
+                  <span>Penal Interest: 3x RBI</span>
+                  <span className="text-amber-400 font-bold">Compounded</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 overflow-x-auto no-scrollbar">
-                {/* Gold 24K */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-amber-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">GOLD 24K</span>
-                    <span className="text-amber-400">🪙</span>
+              {/* Pillar 4: Cyber Fraud Zero Liability */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-purple-400/50 transition-all shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-purple-400 font-mono tracking-wide">
+                      {isHindi ? 'शून्य ग्राहक देयता' : 'ZERO FRAUD LIABILITY'}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-300">
+                      RBI Directive
+                    </span>
                   </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    ₹{liveRates.gold24k.per10g.toLocaleString('en-IN')}
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
+                      100%
+                    </span>
+                    <span className="text-[11px] font-mono text-purple-400 font-bold">
+                      Protected
+                    </span>
                   </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    +{liveRates.gold24k.change} ({liveRates.gold24k.changePercent}%)
-                  </div>
+                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
+                    {isHindi
+                      ? 'अनधिकृत डिजिटल निकासी की 3 दिन में सूचना देने पर शून्य नुकसान। 10 दिनों में बैंक शैडो क्रेडिट।'
+                      : 'Zero customer liability if unauthorized banking fraud is reported within 3 days. Dial 1930.'}
+                  </p>
                 </div>
-
-                {/* Gold 22K */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-amber-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">GOLD 22K (916)</span>
-                    <span className="text-amber-300">💍</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    ₹{liveRates.gold22k.per10g.toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    +{liveRates.gold22k.change} ({liveRates.gold22k.changePercent}%)
-                  </div>
-                </div>
-
-                {/* Silver 1KG */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-sky-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">SILVER 1KG</span>
-                    <span className="text-slate-300">🥈</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    ₹{liveRates.silver.perKg.toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    +{liveRates.silver.change} ({liveRates.silver.changePercent}%)
-                  </div>
-                </div>
-
-                {/* USD / INR */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-emerald-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">USD / INR</span>
-                    <span>🇺🇸</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-emerald-400 mt-0.5 tracking-tight">
-                    ₹{liveRates.forex.USD?.inrRate || 83.92}
-                  </div>
-                  <div className="text-[9.5px] text-[var(--theme-text-dim,#94A3B8)] font-mono truncate mt-0.5">
-                    Live Open Feed
-                  </div>
-                </div>
-
-                {/* EUR / INR */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-emerald-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">EUR / INR</span>
-                    <span>🇪🇺</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    ₹{liveRates.forex.EUR?.inrRate || 91.45}
-                  </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    +0.20% Spot
-                  </div>
-                </div>
-
-                {/* AED / INR */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-emerald-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">AED / INR</span>
-                    <span>🇦🇪</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    ₹{liveRates.forex.AED?.inrRate || 22.85}
-                  </div>
-                  <div className="text-[9.5px] text-[var(--theme-text-dim,#94A3B8)] font-mono truncate mt-0.5">
-                    Dirham Spot
-                  </div>
-                </div>
-
-                {/* Bank Nifty */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-sky-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">BANK NIFTY</span>
-                    <span className="text-sky-400">🏦</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-[var(--theme-text,#F8FAFC)] mt-0.5 tracking-tight">
-                    {liveRates.bankNifty.value.toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    +{liveRates.bankNifty.change}
-                  </div>
-                </div>
-
-                {/* India VIX */}
-                <div className="p-2 rounded-xl bg-[var(--theme-card,#132438)]/90 border border-[var(--theme-border,#213E61)] hover:border-purple-400/60 transition-all flex flex-col justify-between shadow-xs">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                    <span className="truncate">INDIA VIX</span>
-                    <span className="text-purple-400">📊</span>
-                  </div>
-                  <div className="text-[13px] font-black font-mono text-purple-300 mt-0.5 tracking-tight">
-                    {liveRates.indiaVix.value}
-                  </div>
-                  <div className="text-[9.5px] text-emerald-400 font-mono truncate mt-0.5">
-                    {liveRates.indiaVix.changePercent}% (Calm)
-                  </div>
+                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
+                  <span>Helpline: 1930</span>
+                  <span className="text-purple-400 font-bold">10-Day Credit</span>
                 </div>
               </div>
             </div>

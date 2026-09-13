@@ -563,13 +563,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const themeList: { id: AppTheme; label: string; dot: string; isLight?: boolean }[] = [
     { id: 'blue', label: 'Electric Blue', dot: '#38BDF8' },
-    { id: 'yellow', label: 'Premium Gold', dot: '#FFD200' },
+    { id: 'yellow', label: 'Premium Gold', dot: '#F59E0B' },
     { id: 'orange', label: 'Sunset Orange', dot: '#F97316' },
     { id: 'emerald', label: 'Emerald Green', dot: '#10B981' },
     { id: 'purple', label: 'Royal Violet', dot: '#A855F7' },
     { id: 'cyan', label: 'Ocean Teal', dot: '#06B6D4' },
-    { id: 'pink', label: 'Crimson Pink', dot: '#F472B6' },
-    { id: 'black', label: 'Obsidian Black', dot: '#171717' },
+    { id: 'pink', label: 'Crimson Pink', dot: '#F43F5E' },
+    { id: 'black', label: 'Obsidian Black', dot: '#E2E8F0' },
     { id: 'light', label: tStr('दिन / वाइट मोड (Daylight)', 'Day / White Mode (Daylight)', 'Daylight White'), dot: '#0284C7', isLight: true },
     { id: 'white', label: tStr('आउटडोर प्योर वाइट', 'Outdoor Pure White', 'Outdoor Pure White'), dot: '#2563EB', isLight: true }
   ];

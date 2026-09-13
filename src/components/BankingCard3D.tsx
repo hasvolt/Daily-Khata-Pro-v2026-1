@@ -59,23 +59,23 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="banking-card-3d relative bg-gradient-to-r from-[#021338] via-[#05286E] to-[#011438] border border-[#0E3680] rounded-2xl sm:rounded-3xl p-3 sm:p-7 md:p-8 shadow-[0_12px_30px_rgba(0,18,50,0.4)] sm:shadow-[0_20px_50px_rgba(0,18,50,0.5)] overflow-hidden"
+        className="banking-card-3d relative bg-gradient-to-r from-[#0B101B] via-[#131A29] to-[#090E17] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-7 md:p-8 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.4)] overflow-hidden"
       >
         {/* Luminous Glowing Waves & Dot Matrix Pattern on the Right */}
         <div className="banking-card-waves absolute right-0 top-0 bottom-0 w-3/5 sm:w-1/2 pointer-events-none overflow-hidden select-none opacity-80">
           <svg className="w-full h-full" viewBox="0 0 500 240" fill="none" preserveAspectRatio="none">
             <defs>
               <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="var(--theme-primary, #00D2FF)" stopOpacity="0" />
-                <stop offset="30%" stopColor="var(--theme-primary, #00D2FF)" stopOpacity="0.8" />
+                <stop offset="0%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0" />
+                <stop offset="30%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.8" />
                 <stop offset="70%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="var(--theme-glow, #2563EB)" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.2" />
               </linearGradient>
               <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0" />
                 <stop offset="40%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.75" />
-                <stop offset="80%" stopColor="var(--theme-primary, #0284C7)" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="var(--theme-glow, #1E40AF)" stopOpacity="0" />
+                <stop offset="80%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="var(--theme-primary, #38BDF8)" stopOpacity="0.15" />
               </linearGradient>
               <pattern id="dotGrid" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
                 <circle cx="2" cy="2" r="1.1" fill="var(--theme-primary, #38BDF8)" fillOpacity="0.25" />
@@ -90,28 +90,18 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
           </svg>
         </div>
 
-        {/* Animated 3D Interactive Glare */}
-        <motion.div 
-          className="banking-card-glare absolute inset-0 pointer-events-none z-0"
-          style={{
-            background: "radial-gradient(circle at center, var(--theme-glow, rgba(56,189,248,0.12)) 0%, transparent 60%)",
-            x: useTransform(mouseXSpring, [-0.5, 0.5], ["-40%", "40%"]),
-            y: useTransform(mouseYSpring, [-0.5, 0.5], ["-40%", "40%"]),
-          }}
-        />
-
         <div className="relative z-20 flex flex-col justify-between h-full space-y-2.5 sm:space-y-8" style={{ transform: "translateZ(30px)" }}>
           {/* Header Row: Total Net Balance & Date */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-              <div className="banking-card-icon-box p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-[var(--theme-surface,#0B2A6B)] border border-[var(--theme-border,#17459E)] text-[var(--theme-primary,#38BDF8)] flex items-center justify-center shrink-0 shadow-sm transition-colors">
+              <div className="banking-card-icon-box p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-[var(--theme-primary-dim,rgba(56,189,248,0.12))] border border-[var(--theme-primary-border,rgba(56,189,248,0.28))] text-[var(--theme-primary,#38BDF8)] flex items-center justify-center shrink-0 shadow-sm transition-colors">
                 <Wallet className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="banking-card-title text-[10.5px] sm:text-[14px] font-extrabold tracking-wider text-white uppercase truncate transition-colors">
                   {isHindi ? 'कुल बैलेंस (Total Balance)' : 'TOTAL BALANCE'}
                 </span>
-                <span className="banking-card-subtitle text-[9px] sm:text-[11.5px] text-[#8BA4D0] truncate transition-colors">
+                <span className="banking-card-subtitle text-[9px] sm:text-[11.5px] text-[#94A3B8] truncate transition-colors">
                   {isHindi ? 'सभी खातों का कुल बैलेंस' : 'Total cash & account balance'}
                 </span>
               </div>
@@ -125,7 +115,7 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
                   {isHindi ? 'सुरक्षित' : 'SECURED'}
                 </span>
               </div>
-              <div className="banking-card-date-box flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl bg-[var(--theme-surface,#0B2A6B)] border border-[var(--theme-border,#17459E)] text-[var(--theme-primary,#38BDF8)] shadow-sm shrink-0">
+              <div className="banking-card-date-box flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl bg-[var(--theme-primary-dim,rgba(56,189,248,0.12))] border border-[var(--theme-primary-border,rgba(56,189,248,0.28))] text-[var(--theme-primary,#38BDF8)] shadow-sm shrink-0">
                 <Calendar className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[var(--theme-primary,#38BDF8)] shrink-0" />
                 <span className="banking-card-date text-[8.5px] sm:text-[11.5px] font-bold tracking-wide text-[#E2E8F0] uppercase whitespace-nowrap transition-colors notranslate" translate="no">
                   {dateFormatted}
@@ -136,7 +126,7 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
 
           {/* Available Balance Amount */}
           <div className="space-y-0.5 sm:space-y-1.5">
-            <p className="banking-card-label text-[9px] sm:text-[12px] text-[#7E9BC9] tracking-widest uppercase font-semibold transition-colors">
+            <p className="banking-card-label text-[9px] sm:text-[12px] text-[#94A3B8] tracking-widest uppercase font-semibold transition-colors">
               {isHindi ? 'उपलब्ध बैलेंस (Available Balance)' : 'AVAILABLE BALANCE'}
             </p>
             <div 

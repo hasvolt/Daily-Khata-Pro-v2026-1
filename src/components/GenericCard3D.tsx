@@ -46,17 +46,8 @@ export function GenericCard3D({ children, className = "", intensity = 10 }: Gene
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className={`relative bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] overflow-hidden transition-all duration-300 ${className}`}
+        className={`relative bg-[var(--theme-card,#141B28)] border border-[var(--theme-border,rgba(255,255,255,0.08))] rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden transition-all duration-300 ${className}`}
       >
-        {/* Animated Glare */}
-        <motion.div 
-          className="absolute inset-0 pointer-events-none z-20"
-          style={{
-            background: "radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%)",
-            x: useTransform(mouseXSpring, [-0.5, 0.5], ["-50%", "50%"]),
-            y: useTransform(mouseYSpring, [-0.5, 0.5], ["-50%", "50%"]),
-          }}
-        />
         <div className="relative z-10 h-full w-full" style={{ transform: "translateZ(20px)" }}>
           {children}
         </div>

@@ -265,7 +265,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <h3 className="text-[15px] sm:text-[18px] font-bold tracking-tight text-[var(--theme-text,#F8FAFC)]">
                 {isHindi ? 'धन का बंटवारा (Categories)' : 'Money Categories'}
               </h3>
-              <p className="text-[10.5px] sm:text-[12px] text-[var(--theme-text-muted,#7E9BC9)]">
+              <p className="text-[10.5px] sm:text-[12px] text-[var(--theme-text-muted,#94A3B8)]">
                 {isHindi ? 'अपने पैसों को अलग-अलग जरूरतों के हिसाब से बांटें।' : 'Divide your money into different purpose-driven categories.'}
               </p>
             </div>
@@ -275,7 +275,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <button
               type="button"
               onClick={() => setIsSelectorOpen(true)}
-              className="text-[11px] sm:text-[12px] font-bold text-[var(--theme-text,#F8FAFC)] bg-[var(--theme-card,#040E24)] hover:bg-[var(--theme-surface,#07173B)] px-3 py-1.5 rounded-xl border border-[var(--theme-border,#0D2654)] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.4))] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+              className="text-[11px] sm:text-[12px] font-bold text-[var(--theme-text,#F8FAFC)] bg-[var(--theme-card,#141B28)] hover:bg-[var(--theme-surface,#0F1420)] px-3 py-1.5 rounded-xl border border-[var(--theme-border,rgba(255,255,255,0.08))] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.4))] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
               title="Customize Homepage Fund Categories"
             >
               <Sliders className="w-3.5 h-3.5 text-[var(--theme-primary,#38BDF8)]" />
@@ -419,8 +419,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
         transition={{ duration: 0.5, delay: 0.3 }}
       >
         {/* Recent Transactions Card */}
-        <div className="bg-[var(--theme-card,#040E24)] border border-[var(--theme-border,#0D2654)] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.4))] rounded-2xl p-3.5 sm:p-5 shadow-md flex flex-col justify-between space-y-3 transition-all duration-300 relative overflow-hidden">
-          <div className="flex items-center justify-between text-[13px] sm:text-[14px] font-semibold text-[var(--theme-text,#F8FAFC)] border-b border-[var(--theme-border,#0D2654)]/80 pb-2.5">
+        <div className="bg-[var(--theme-card,#141B28)] border border-[var(--theme-border,rgba(255,255,255,0.08))] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.4))] rounded-2xl p-3.5 sm:p-5 shadow-md flex flex-col justify-between space-y-3 transition-all duration-300 relative overflow-hidden">
+          <div className="flex items-center justify-between text-[13px] sm:text-[14px] font-semibold text-[var(--theme-text,#F8FAFC)] border-b border-[var(--theme-border,rgba(255,255,255,0.08))] pb-2.5">
             <span className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-[var(--theme-primary-dim,rgba(56,189,248,0.15))] border border-[var(--theme-primary-border,rgba(56,189,248,0.3))] text-[var(--theme-primary,#38BDF8)] transition-colors">
                 <History className="w-4 h-4" />
@@ -444,7 +444,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               return (
                 <div 
                   key={entry.id} 
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--theme-surface,#020A1A)] border border-[var(--theme-border,#0A2249)] hover:border-[#1E4E9E] transition-colors relative overflow-hidden group/item"
+                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-[var(--theme-surface,#0F1420)] border border-[var(--theme-border,rgba(255,255,255,0.08))] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.3))] transition-colors relative overflow-hidden group/item"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className={`p-2 rounded-lg shrink-0 relative ${entry.type === 'income' ? 'bg-emerald-600/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-600/20 text-rose-600 dark:text-rose-400'}`}>
@@ -456,7 +456,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                           {entry.category}
                         </span>
                       </div>
-                      <span className="text-[10px] sm:text-[11px] text-[var(--theme-text-muted,#7E9BC9)] truncate">
+                      <span className="text-[10px] sm:text-[11px] text-[var(--theme-text-muted,#94A3B8)] truncate">
                         {entry.date}
                       </span>
                     </div>
@@ -468,20 +468,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
               );
             })}
             {entries.length === 0 && (
-              <div className="text-center py-6 text-[12px] text-[var(--theme-text-muted,#7E9BC9)] font-medium">
+              <div className="text-center py-6 text-[12px] text-[var(--theme-text-muted,#94A3B8)] font-medium">
                 {isHindi ? 'कोई लेन-देन नहीं मिला' : 'No recent transactions'}
               </div>
             )}
           </div>
           
-          <div className="flex items-center justify-center gap-1.5 pt-2 border-t border-[var(--theme-border,#0D2654)]/80 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+          <div className="flex items-center justify-center gap-1.5 pt-2 border-t border-[var(--theme-border,rgba(255,255,255,0.08))] text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="truncate">{isHindi ? 'लोकल सैंडबॉक्स स्टोरेज • शून्य टेलीमेट्री' : 'Sandboxed Local Storage • Zero Telemetry'}</span>
           </div>
         </div>
 
         {/* Security Assurance Card */}
-        <div className="bg-[var(--theme-card,#040E24)] border border-[var(--theme-border,#0D2654)] hover:border-[var(--theme-primary,#38BDF8)]/40 rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-3.5 relative overflow-hidden group">
+        <div className="bg-[var(--theme-card,#141B28)] border border-[var(--theme-border,rgba(255,255,255,0.08))] hover:border-[var(--theme-primary,#38BDF8)]/40 rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-3.5 relative overflow-hidden group">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-[var(--theme-primary-dim,rgba(56,189,248,0.15))] border border-[var(--theme-primary-border,rgba(56,189,248,0.25))] text-[var(--theme-primary,#38BDF8)] shadow-xs shrink-0">
               <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -490,36 +490,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <h4 className="text-[14px] sm:text-[15px] font-bold text-[var(--theme-text,#F8FAFC)] tracking-tight truncate">
                 {isHindi ? 'लोकल स्टोरेज व डेटा सुरक्षा' : 'Local Storage & Data Privacy'}
               </h4>
-              <p className="text-[10.5px] sm:text-[11.5px] text-[var(--theme-text-muted,#7E9BC9)] line-clamp-2 leading-relaxed mt-0.5">
+              <p className="text-[10.5px] sm:text-[11.5px] text-[var(--theme-text-muted,#94A3B8)] line-clamp-2 leading-relaxed mt-0.5">
                 {isHindi ? 'समस्त वित्तीय प्रविष्टियां आपके डिवाइस के स्थानीय स्टोरेज में सहेजी जाती हैं। कोई बाहरी ट्रैकिंग या सर्वर सिंक नहीं।' : 'All financial logs remain sandboxed in your device storage with zero remote telemetry.'}
               </p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2 pt-1">
-            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#020A1A)] border border-[var(--theme-border,#0A2249)] space-y-1">
+            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#0F1420)] border border-[var(--theme-border,rgba(255,255,255,0.08))] space-y-1">
               <HardDrive className="w-4 h-4 text-[var(--theme-primary,#38BDF8)]" />
               <span className="text-[10px] font-bold text-[var(--theme-text,#F8FAFC)] block leading-tight">
                 {isHindi ? 'लोकल स्टोरेज' : 'Client Storage'}
               </span>
-              <span className="text-[8.5px] text-[var(--theme-text-muted,#7E9BC9)] block uppercase tracking-wider">
+              <span className="text-[8.5px] text-[var(--theme-text-muted,#94A3B8)] block uppercase tracking-wider">
                 {isHindi ? 'डिवाइस सैंडबॉक्स' : 'Local Device'}
               </span>
             </div>
-            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#020A1A)] border border-[var(--theme-border,#0A2249)] space-y-1">
+            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#0F1420)] border border-[var(--theme-border,rgba(255,255,255,0.08))] space-y-1">
               <EyeOff className="w-4 h-4 text-emerald-500" />
               <span className="text-[10px] font-bold text-[var(--theme-text,#F8FAFC)] block leading-tight">
                 {isHindi ? 'शून्य टेलीमेट्री' : 'Zero Telemetry'}
               </span>
-              <span className="text-[8.5px] text-[var(--theme-text-muted,#7E9BC9)] block uppercase tracking-wider">
+              <span className="text-[8.5px] text-[var(--theme-text-muted,#94A3B8)] block uppercase tracking-wider">
                 {isHindi ? 'शून्य रिमोट सिंक' : 'No Remote Sync'}
               </span>
             </div>
-            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#020A1A)] border border-[var(--theme-border,#0A2249)] space-y-1">
+            <div className="flex flex-col items-center justify-center text-center p-2 rounded-xl bg-[var(--theme-surface,#0F1420)] border border-[var(--theme-border,rgba(255,255,255,0.08))] space-y-1">
               <Lock className="w-4 h-4 text-amber-500" />
               <span className="text-[10px] font-bold text-[var(--theme-text,#F8FAFC)] block leading-tight">
                 {isHindi ? 'एक्सेस कंट्रोल' : 'Access Control'}
               </span>
-              <span className="text-[8.5px] text-[var(--theme-text-muted,#7E9BC9)] block uppercase tracking-wider">
+              <span className="text-[8.5px] text-[var(--theme-text-muted,#94A3B8)] block uppercase tracking-wider">
                 {isHindi ? 'पिन लॉक' : 'PIN & Biometric'}
               </span>
             </div>

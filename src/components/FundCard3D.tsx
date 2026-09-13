@@ -58,18 +58,8 @@ export function FundCard3D({ config, val, pct, fundTranslatedName, subtitle, Fun
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="relative p-3.5 sm:p-4 bg-[var(--theme-card,#040E24)] border border-[var(--theme-border,#0D2654)] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.5))] rounded-2xl cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl text-left flex flex-col justify-between min-w-0 w-full overflow-hidden group/card"
+        className="relative p-3.5 sm:p-4 bg-[var(--theme-card,#141B28)] border border-[var(--theme-border,rgba(255,255,255,0.08))] hover:border-[var(--theme-primary-border,rgba(56,189,248,0.35))] rounded-2xl cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md text-left flex flex-col justify-between min-w-0 w-full overflow-hidden group/card"
       >
-        {/* Animated Glare themed to active theme glow */}
-        <motion.div 
-          className="absolute inset-0 pointer-events-none z-20"
-          style={{
-            background: "radial-gradient(circle at center, var(--theme-glow, rgba(56,189,248,0.08)) 0%, transparent 65%)",
-            x: useTransform(mouseXSpring, [-0.5, 0.5], ["-40%", "40%"]),
-            y: useTransform(mouseYSpring, [-0.5, 0.5], ["-40%", "40%"]),
-          }}
-        />
-
         {/* Top row: Icon + Name & Amount + Circular Progress Ring */}
         <div className="flex items-center justify-between gap-2.5 relative z-10" style={{ transform: "translateZ(20px)" }}>
           {/* Left: Category Icon */}
@@ -121,14 +111,14 @@ export function FundCard3D({ config, val, pct, fundTranslatedName, subtitle, Fun
         </div>
 
         {/* Bottom row: Subtitle Description + Micro Progress Bar */}
-        <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#0D2654)]/60 relative z-10 space-y-1.5" style={{ transform: "translateZ(10px)" }}>
+        <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,rgba(255,255,255,0.08))] relative z-10 space-y-1.5" style={{ transform: "translateZ(10px)" }}>
           {subtitle && (
-            <p className="text-[11px] sm:text-[12px] text-[var(--theme-text-muted,#7E9BC9)] leading-snug line-clamp-1">
+            <p className="text-[11px] sm:text-[12px] text-[var(--theme-text-muted,#94A3B8)] leading-snug line-clamp-1">
               {subtitle}
             </p>
           )}
           {/* Subtle micro progress line */}
-          <div className="w-full h-1 bg-[var(--theme-surface,#020A1A)] rounded-full overflow-hidden">
+          <div className="w-full h-1 bg-[var(--theme-surface,#0F1420)] rounded-full overflow-hidden">
             <div 
               className="h-full rounded-full transition-all duration-700" 
               style={{ 
