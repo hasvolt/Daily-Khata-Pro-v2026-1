@@ -75,7 +75,9 @@ import {
   googleSignIn,
   uploadBackupToDrive,
   getAccessToken,
-  BACKUP_FILE_NAME
+  BACKUP_FILE_NAME,
+  getStoredUserProfile,
+  isGoogleLinked
 } from '../services/googleDriveService';
 import { triggerHapticSound } from '../utils/khataCalculations';
 import {
@@ -1441,10 +1443,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
 
                   {/* Account Status Badge */}
-                  {auth.currentUser ? (
+                  {isGoogleLinked() ? (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold shrink-0 self-start sm:self-auto">
                       <CloudCheck className="w-3.5 h-3.5" />
-                      <span className="truncate max-w-[140px]">{auth.currentUser.displayName || auth.currentUser.email || 'Connected'}</span>
+                      <span className="truncate max-w-[140px]">{auth.currentUser?.displayName || getStoredUserProfile()?.displayName || auth.currentUser?.email || getStoredUserProfile()?.email || 'Connected'}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-500/15 border border-slate-500/30 text-slate-400 text-[11px] font-medium shrink-0 self-start sm:self-auto">

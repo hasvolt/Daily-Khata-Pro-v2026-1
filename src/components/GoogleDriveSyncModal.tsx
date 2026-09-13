@@ -31,7 +31,10 @@ import {
   DriveFileInfo,
   BACKUP_FILE_NAME,
   AUTO_SYNC_FILE_NAME,
-  getAccessToken
+  getAccessToken,
+  isGoogleLinked,
+  getStoredUserProfile,
+  StoredUserProfile
 } from '../services/googleDriveService';
 import { User } from 'firebase/auth';
 import { triggerHapticSound } from '../utils/khataCalculations';
@@ -59,7 +62,9 @@ export const GoogleDriveSyncModal: React.FC<GoogleDriveSyncModalProps> = ({
   lastSyncTime,
   isAutoSyncing = false
 }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
+  const [currentUser, setCurrentUser] = useState<User | StoredUserProfile | null>(
+    auth.currentUser || getStoredUserProfile()
+  );
   const [hasToken, setHasToken] = useState<boolean>(Boolean(getAccessToken()));
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [isManualBackingUp, setIsManualBackingUp] = useState<boolean>(false);
@@ -89,7 +94,7 @@ export const GoogleDriveSyncModal: React.FC<GoogleDriveSyncModalProps> = ({
         setHasToken(Boolean(token));
       },
       () => {
-        setCurrentUser(auth.currentUser);
+        setCurrentUser(auth.currentUser || getStoredUserProfile());
         setHasToken(Boolean(getAccessToken()));
       }
     );

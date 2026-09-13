@@ -17,52 +17,18 @@ export const auth: Auth = getAuth(app);
 // Workspace Google Drive Scope
 export const DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 
-const provider = new GoogleAuthProvider();
-DRIVE_SCOPES.forEach((scope) => provider.addScope(scope));
-provider.setCustomParameters({
-  prompt: 'select_account'
-});
+// Local Storage keys for permanent connection & token persistence
+export const TOKEN_KEY = 'dkp_drive_token';
+export const TOKEN_EXPIRY_KEY = 'dkp_drive_token_expiry';
+export const USER_PROFILE_KEY = 'dkp_drive_user_profile';
+export const GOOGLE_LINKED_KEY = 'dkp_drive_google_linked';
 
-// Local Storage keys for token persistence
-const TOKEN_KEY = 'dkp_drive_token';
-const TOKEN_EXPIRY_KEY = 'dkp_drive_token_expiry';
-
-const getStoredToken = (): string | null => {
-  try {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
-    if (token && expiry) {
-      if (Date.now() < parseInt(expiry, 10)) {
-        return token;
-      } else {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(TOKEN_EXPIRY_KEY);
-      }
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-  return null;
-};
-
-const setStoredToken = (token: string | null) => {
-  try {
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-      // OAuth tokens usually last 1 hour. Store for 55 minutes to be safe.
-      localStorage.setItem(TOKEN_EXPIRY_KEY, (Date.now() + 55 * 60 * 1000).toString());
-    } else {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRY_KEY);
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-};
-
-// Cache the access token in memory, initialized from localStorage if available
-let cachedAccessToken: string | null = getStoredToken();
-let isSigningIn = false;
+export interface StoredUserProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 export interface DriveFileInfo {
   id: string;
@@ -74,26 +40,230 @@ export interface DriveFileInfo {
 }
 
 /**
+ * Retrieve saved user profile from localStorage
+ */
+export const getStoredUserProfile = (): StoredUserProfile | null => {
+  try {
+    const raw = localStorage.getItem(USER_PROFILE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    // Ignore parse error
+  }
+  return null;
+};
+
+/**
+ * Persist user profile and permanent linked state
+ */
+export const setStoredUserProfile = (profile: StoredUserProfile | null) => {
+  try {
+    if (profile) {
+      localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
+      localStorage.setItem(GOOGLE_LINKED_KEY, 'true');
+    } else {
+      localStorage.removeItem(USER_PROFILE_KEY);
+      localStorage.removeItem(GOOGLE_LINKED_KEY);
+    }
+  } catch (e) {
+    // Ignore storage errors
+  }
+};
+
+/**
+ * Check if the user has permanently linked their Google Account
+ */
+export const isGoogleLinked = (): boolean => {
+  try {
+    return (
+      Boolean(auth.currentUser) ||
+      localStorage.getItem(GOOGLE_LINKED_KEY) === 'true' ||
+      Boolean(getStoredUserProfile())
+    );
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Retrieve stored Google OAuth token (does NOT proactively delete on expiry to prevent jarring logouts)
+ */
+export const getStoredToken = (): string | null => {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Check if the stored token has passed its expiry window
+ */
+export const isTokenExpired = (): boolean => {
+  try {
+    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+    if (!expiry) return true;
+    // Mark expired 2 minutes before actual expiration
+    return Date.now() >= (parseInt(expiry, 10) - 2 * 60 * 1000);
+  } catch {
+    return true;
+  }
+};
+
+/**
+ * Store Google OAuth access token with expiration timestamp
+ */
+export const setStoredToken = (token: string | null, expiresInSeconds: number = 3600) => {
+  try {
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(TOKEN_EXPIRY_KEY, (Date.now() + expiresInSeconds * 1000).toString());
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    }
+  } catch (e) {
+    // Ignore storage errors
+  }
+};
+
+// In-memory token cache
+let cachedAccessToken: string | null = getStoredToken();
+let isSigningIn = false;
+let gisTokenClient: any = null;
+
+/**
+ * Initialize Google Identity Services (GIS) Token Client for silent token renewal
+ */
+export const initGisClient = () => {
+  if (gisTokenClient) return gisTokenClient;
+  if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
+    try {
+      gisTokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: firebaseConfig.oAuthClientId,
+        scope: DRIVE_SCOPES.join(' '),
+        callback: () => {}
+      });
+      return gisTokenClient;
+    } catch (e) {
+      console.warn('[Google Drive] GIS init note:', e);
+    }
+  }
+  return null;
+};
+
+/**
+ * Silent token renewal using Google Identity Services (no intrusive popup)
+ */
+export const silentRefreshToken = async (hintEmail?: string): Promise<string | null> => {
+  const email = hintEmail || auth.currentUser?.email || getStoredUserProfile()?.email || undefined;
+  const client = initGisClient();
+  if (!client) return null;
+
+  return new Promise<string | null>((resolve) => {
+    let resolved = false;
+    const timer = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve(null);
+      }
+    }, 6000);
+
+    client.callback = (resp: any) => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timer);
+        if (resp && resp.access_token) {
+          cachedAccessToken = resp.access_token;
+          const expiresIn = resp.expires_in ? parseInt(resp.expires_in, 10) : 3600;
+          setStoredToken(resp.access_token, expiresIn);
+          resolve(resp.access_token);
+        } else {
+          resolve(null);
+        }
+      }
+    };
+
+    try {
+      client.requestAccessToken({
+        prompt: '',
+        hint: email
+      });
+    } catch (err) {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timer);
+        resolve(null);
+      }
+    }
+  });
+};
+
+/**
+ * Create Google Auth Provider with offline access and email hint
+ */
+export const createGoogleProvider = (emailHint?: string) => {
+  const provider = new GoogleAuthProvider();
+  DRIVE_SCOPES.forEach((scope) => provider.addScope(scope));
+  const params: Record<string, string> = {
+    access_type: 'offline',
+    include_granted_scopes: 'true'
+  };
+  if (emailHint) {
+    params.login_hint = emailHint;
+  }
+  provider.setCustomParameters(params);
+  return provider;
+};
+
+/**
  * Initialize Google Auth State listener.
+ * Preserves user connection permanently across app reloads, tab switches, and offline modes.
  */
 export const initAuth = (
-  onAuthSuccess?: (user: User, token: string) => void,
+  onAuthSuccess?: (user: User | StoredUserProfile, token: string | null) => void,
   onAuthFailure?: () => void
 ) => {
+  // 1. Immediately emit existing linked profile from localStorage (prevents blank/flickering states)
+  const existingProfile = getStoredUserProfile();
+  const existingToken = getStoredToken();
+  if (isGoogleLinked() && existingProfile) {
+    if (onAuthSuccess) onAuthSuccess(auth.currentUser || existingProfile, existingToken);
+  }
+
+  // 2. Listen to Firebase auth state changes
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        // Token not yet acquired in memory for this session, user must click Sign in to grant access token
-        cachedAccessToken = null;
-        setStoredToken(null);
-        if (onAuthFailure) onAuthFailure();
+      const profile: StoredUserProfile = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL
+      };
+      setStoredUserProfile(profile);
+
+      let token = cachedAccessToken || getStoredToken();
+      if (!token || isTokenExpired()) {
+        // Attempt background silent refresh
+        const fresh = await silentRefreshToken(user.email || undefined).catch(() => null);
+        if (fresh) {
+          token = fresh;
+        }
+      }
+
+      if (onAuthSuccess) {
+        onAuthSuccess(user, token);
       }
     } else {
-      cachedAccessToken = null;
-      setStoredToken(null);
-      if (onAuthFailure) onAuthFailure();
+      // Firebase auth instance is currently null (e.g., initial boot or offline)
+      if (isGoogleLinked()) {
+        const prof = getStoredUserProfile();
+        if (prof && onAuthSuccess) {
+          onAuthSuccess(prof, cachedAccessToken || getStoredToken());
+        }
+      } else {
+        cachedAccessToken = null;
+        if (onAuthFailure) onAuthFailure();
+      }
     }
   });
 };
@@ -101,9 +271,14 @@ export const initAuth = (
 /**
  * Google Sign In with Popup
  */
-export const googleSignIn = async (): Promise<{ user: User; accessToken: string }> => {
+export const googleSignIn = async (
+  isReauth: boolean = false
+): Promise<{ user: User | StoredUserProfile; accessToken: string }> => {
   try {
     isSigningIn = true;
+    const emailHint = auth.currentUser?.email || getStoredUserProfile()?.email || undefined;
+    const provider = createGoogleProvider(isReauth ? emailHint : undefined);
+
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     if (!credential?.accessToken) {
@@ -111,7 +286,16 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
     }
 
     cachedAccessToken = credential.accessToken;
-    setStoredToken(cachedAccessToken);
+    setStoredToken(cachedAccessToken, 3600);
+
+    const profile: StoredUserProfile = {
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      photoURL: result.user.photoURL
+    };
+    setStoredUserProfile(profile);
+
     return { user: result.user, accessToken: cachedAccessToken };
   } catch (error: any) {
     console.error('Google Sign In Error:', error);
@@ -122,27 +306,98 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
 };
 
 /**
- * Get current in-memory access token
+ * Get current access token
  */
 export const getAccessToken = (): string | null => {
-  return cachedAccessToken;
+  return cachedAccessToken || getStoredToken();
 };
 
 /**
- * Sign out and clear in-memory token
+ * Ensures a valid access token is available, automatically refreshing if needed
+ */
+export const getOrRefreshAccessToken = async (interactive: boolean = false): Promise<string> => {
+  // If active and valid, return immediately
+  if (cachedAccessToken && !isTokenExpired()) {
+    return cachedAccessToken;
+  }
+
+  const stored = getStoredToken();
+  if (stored && !isTokenExpired()) {
+    cachedAccessToken = stored;
+    return stored;
+  }
+
+  // Attempt silent background refresh
+  const silentlyRefreshed = await silentRefreshToken().catch(() => null);
+  if (silentlyRefreshed) {
+    return silentlyRefreshed;
+  }
+
+  // If we still have stored token, attempt to use it
+  if (stored) {
+    cachedAccessToken = stored;
+    return stored;
+  }
+
+  // If interactive mode is permitted (e.g. user initiated 1-click backup/restore/sync)
+  if (interactive) {
+    const res = await googleSignIn(true);
+    return res.accessToken;
+  }
+
+  throw new Error('Google Drive session expired. Please sign in to reconnect.');
+};
+
+/**
+ * Explicit user-triggered Sign Out — permanently disconnects Google account
  */
 export const googleSignOut = async (): Promise<void> => {
-  await signOut(auth);
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.warn('[Google Drive] Firebase sign out error:', e);
+  }
   cachedAccessToken = null;
   setStoredToken(null);
+  setStoredUserProfile(null);
 };
 
 /**
  * Check if currently authenticated with Google Drive token
  */
 export const isDriveAuthenticated = (): boolean => {
-  return Boolean(auth.currentUser && cachedAccessToken);
+  return isGoogleLinked() && Boolean(getAccessToken());
 };
+
+/**
+ * Wraps Drive API calls with automatic 401 retry & token self-healing
+ */
+async function executeDriveRequest(
+  requestFn: (token: string) => Promise<Response>,
+  interactiveOnFail: boolean = true
+): Promise<Response> {
+  let token = await getOrRefreshAccessToken(false).catch(() => getAccessToken() || '');
+  if (!token) {
+    token = await getOrRefreshAccessToken(interactiveOnFail);
+  }
+
+  let res = await requestFn(token);
+  if (res.status === 401) {
+    console.warn('[Google Drive] Token expired (401). Attempting automatic renewal...');
+    // Try silent refresh first
+    const fresh = await silentRefreshToken().catch(() => null);
+    if (fresh) {
+      token = fresh;
+      res = await requestFn(token);
+    } else if (interactiveOnFail) {
+      // Re-authenticate seamlessly with login_hint
+      const reauth = await googleSignIn(true);
+      token = reauth.accessToken;
+      res = await requestFn(token);
+    }
+  }
+  return res;
+}
 
 export const BACKUP_FILE_NAME = 'daily-khata-pro-cloud-backup.json';
 export const AUTO_SYNC_FILE_NAME = 'daily-khata-pro-auto-sync.json';
@@ -151,20 +406,19 @@ export const AUTO_SYNC_FILE_NAME = 'daily-khata-pro-auto-sync.json';
  * List existing Daily Khata Pro backups on Google Drive
  */
 export const listDriveBackups = async (): Promise<DriveFileInfo[]> => {
-  const token = cachedAccessToken;
-  if (!token) throw new Error('Not authenticated with Google Drive');
-
   const query = encodeURIComponent(
     "trashed = false and (name contains 'daily-khata-pro' or name contains 'Daily Khata')"
   );
   const fields = encodeURIComponent('files(id, name, modifiedTime, size, description, webViewLink)');
   const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=${fields}&orderBy=modifiedTime desc`;
 
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const res = await executeDriveRequest((token) =>
+    fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+  );
 
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
@@ -184,9 +438,6 @@ export const uploadBackupToDrive = async (
   fileName: string = BACKUP_FILE_NAME,
   isAutoSync: boolean = false
 ): Promise<{ fileId: string; modifiedTime: string; webViewLink?: string }> => {
-  const token = cachedAccessToken;
-  if (!token) throw new Error('Google Drive access token is missing. Please sign in.');
-
   // Find if this specific file already exists on user's drive
   const existingFiles = await listDriveBackups().catch(() => []);
   const targetFile = existingFiles.find((f) => f.name === fileName);
@@ -200,14 +451,18 @@ export const uploadBackupToDrive = async (
   if (targetFile?.id) {
     // Update existing file content
     const updateUrl = `https://www.googleapis.com/upload/drive/v3/files/${targetFile.id}?uploadType=media`;
-    const res = await fetch(updateUrl, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: jsonContent
-    });
+    const res = await executeDriveRequest(
+      (token) =>
+        fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: jsonContent
+        }),
+      !isAutoSync // In background auto-sync, don't pop up unless interactive
+    );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -216,14 +471,18 @@ export const uploadBackupToDrive = async (
 
     // Update metadata (description and timestamp)
     const metaUrl = `https://www.googleapis.com/drive/v3/files/${targetFile.id}?fields=id,name,modifiedTime,webViewLink`;
-    const metaRes = await fetch(metaUrl, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ description })
-    });
+    const metaRes = await executeDriveRequest(
+      (token) =>
+        fetch(metaUrl, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ description })
+        }),
+      !isAutoSync
+    );
 
     const metaData = await metaRes.json().catch(() => ({}));
     return {
@@ -252,14 +511,21 @@ export const uploadBackupToDrive = async (
       jsonContent +
       closeDelim;
 
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime,webViewLink', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`
-      },
-      body: multipartRequestBody
-    });
+    const res = await executeDriveRequest(
+      (token) =>
+        fetch(
+          'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime,webViewLink',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': `multipart/related; boundary=${boundary}`
+            },
+            body: multipartRequestBody
+          }
+        ),
+      !isAutoSync
+    );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -279,15 +545,14 @@ export const uploadBackupToDrive = async (
  * Fetch and parse backup data from Google Drive by file ID
  */
 export const downloadBackupFromDrive = async (fileId: string): Promise<any> => {
-  const token = cachedAccessToken;
-  if (!token) throw new Error('Not authenticated with Google Drive');
-
   const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const res = await executeDriveRequest((token) =>
+    fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+  );
 
   if (!res.ok) {
     throw new Error(`Failed to download backup (${res.status})`);
@@ -301,18 +566,18 @@ export const downloadBackupFromDrive = async (fileId: string): Promise<any> => {
  * Delete a file from Google Drive (Mandatory user confirmation required by caller!)
  */
 export const deleteBackupFromDrive = async (fileId: string): Promise<void> => {
-  const token = cachedAccessToken;
-  if (!token) throw new Error('Not authenticated with Google Drive');
-
   const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const res = await executeDriveRequest((token) =>
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+  );
 
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to delete backup file (${res.status})`);
   }
 };
+

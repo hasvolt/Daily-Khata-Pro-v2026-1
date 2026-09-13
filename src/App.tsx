@@ -83,7 +83,8 @@ import {
   initAuth,
   uploadBackupToDrive,
   getAccessToken,
-  AUTO_SYNC_FILE_NAME
+  AUTO_SYNC_FILE_NAME,
+  isGoogleLinked
 } from './services/googleDriveService';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { TRANSLATIONS } from './utils/translations';
@@ -259,10 +260,10 @@ function AppContent() {
   useEffect(() => {
     const unsub = initAuth(
       (_user, token) => {
-        setIsDriveConnected(Boolean(token));
+        setIsDriveConnected(isGoogleLinked());
       },
       () => {
-        setIsDriveConnected(Boolean(getAccessToken()));
+        setIsDriveConnected(isGoogleLinked());
       }
     );
     return () => unsub();
@@ -705,7 +706,7 @@ function AppContent() {
 
   const triggerDriveAutoSync = (dataToSync: KhataData) => {
     if (!autoSyncEnabled) return;
-    if (!getAccessToken()) return;
+    if (!isGoogleLinked()) return;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
     if (autoSyncDebounceRef.current) {
@@ -736,7 +737,7 @@ function AppContent() {
 
     if (enabled) {
       triggerHapticSound('save');
-      if (getAccessToken()) {
+      if (isGoogleLinked()) {
         try {
           setIsAutoSyncing(true);
           const currentData: KhataData = {
