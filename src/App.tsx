@@ -28,6 +28,7 @@ import { PersonalNotesView } from './components/PersonalNotesView';
 import { WorkModal } from './components/WorkModal';
 import { DailyLifeModal } from './components/DailyLifeModal';
 import { PersonalNoteModal } from './components/PersonalNoteModal';
+import { StudioPage } from './pages/StudioPage';
 import { SettingsModal } from './components/SettingsModal';
 import { GoalModal } from './components/GoalModal';
 import { DepositGoalModal } from './components/DepositGoalModal';
@@ -62,6 +63,7 @@ import { AttendancePage } from './components/AttendancePage';
 import { WealthAcademyPage } from './components/WealthAcademyPage';
 import { WealthArticlePage } from './components/WealthArticlePage';
 import { CommercialNewsPortalPage } from './components/CommercialNewsPortalPage';
+import { SanityBlogPage } from './components/SanityBlogPage';
 import { CookiesPage } from './components/CookiesPage';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { RemindersModal } from './components/RemindersModal';
@@ -111,6 +113,22 @@ const NewsArticleWrapper: React.FC<{ language: AppLanguage; onBack: () => void; 
   const { id } = useParams<{ id: string }>();
   return (
     <CommercialNewsPortalPage
+      language={language}
+      onBack={onBack}
+      initialArticleId={id || null}
+      onNavigateTab={onNavigateTab}
+    />
+  );
+};
+
+const SanityBlogArticleWrapper: React.FC<{ language: AppLanguage; onBack: () => void; onNavigateTab: (tab: string) => void }> = ({
+  language,
+  onBack,
+  onNavigateTab
+}) => {
+  const { id } = useParams<{ id: string }>();
+  return (
+    <SanityBlogPage
       language={language}
       onBack={onBack}
       initialArticleId={id || null}
@@ -2489,6 +2507,22 @@ function AppContent() {
             />
           } />
 
+          <Route path="/blog" element={
+            <SanityBlogPage
+              onBack={() => setCurrentTab('home')}
+              language={language}
+              onNavigateTab={(tab) => setCurrentTab(tab as NavTab)}
+            />
+          } />
+
+          <Route path="/blog/:id" element={
+            <SanityBlogArticleWrapper
+              language={language}
+              onBack={() => setCurrentTab('blog')}
+              onNavigateTab={(tab) => setCurrentTab(tab as NavTab)}
+            />
+          } />
+
           <Route path="/tracker" element={
             <WorkLifeTrackerView
               workLogs={workLogs}
@@ -2743,6 +2777,7 @@ function AppContent() {
               language={language}
               privacyMask={privacyMask}
             />} />
+            <Route path="/studio/*" element={<StudioPage />} />
           </Routes>
           </ErrorBoundary>
         </div>
@@ -2845,6 +2880,8 @@ function AppContent() {
           {/* Legal Links */}
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[13px] sm:text-[13.5px] text-[var(--theme-text-muted,#94A3B8)] pb-2 pt-1 font-medium">
             <button onClick={() => setCurrentTab('news')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors text-[var(--theme-primary,#38BDF8)] font-semibold">{language === 'hi' ? 'समाचार व रिसर्च' : 'News & Research'}</button>
+            <span className="opacity-40">•</span>
+            <button onClick={() => setCurrentTab('blog')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors text-indigo-400 font-semibold">{language === 'hi' ? 'लाइव ब्लॉग' : 'Live Blog'}</button>
             <span className="opacity-40">•</span>
             <button onClick={() => setCurrentTab('privacy')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors">Privacy Policy</button>
             <span className="opacity-40">•</span>

@@ -1127,9 +1127,6 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                           <span className="text-[12.5px] font-bold text-[var(--theme-text,#F8FAFC)] block truncate">
                             {isHindi ? 'वाणिज्यिक समाचार व रिसर्च' : 'News & Research Portal'}
                           </span>
-                          <span className="text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-400/20 text-sky-400 border border-sky-400/30">
-                            LIVE
-                          </span>
                         </div>
                         <span className="text-[10px] text-[var(--theme-text-dim,#94A3B8)] truncate block">
                           {isHindi ? 'मार्केट, अर्थशास्त्र, फिनटेक, टैक्स व उद्योग रिपोर्ट' : 'Global markets, macro, fintech, policy & industry reports'}
@@ -1137,6 +1134,38 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                       </div>
                     </div>
                     <ChevronRight className="w-3.5 h-3.5 text-[var(--theme-text-dim,#64748B)] shrink-0 group-hover:text-sky-400 transition-colors" />
+                  </button>
+
+                  {/* Sanity CMS Live Blog */}
+                  <button
+                    type="button"
+                    onClick={() => onSelectTab && handleMenuAction(() => onSelectTab('blog'))}
+                    className={`w-full flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer text-left group ${
+                      currentTab === 'blog'
+                        ? 'bg-[var(--theme-primary,#38BDF8)]/15 border-[var(--theme-primary,#38BDF8)] shadow-xs'
+                        : 'bg-[var(--theme-surface,#0E1A29)]/80 hover:bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] hover:border-sky-500/40'
+                    }`}
+                    id="menu-sanity-blog-btn"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
+                        <Newspaper className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[12.5px] font-bold text-[var(--theme-text,#F8FAFC)] block truncate">
+                            {isHindi ? 'लाइव ब्लॉग (Sanity)' : 'Live Blog (Sanity)'}
+                          </span>
+                          <span className="text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-400/20 text-indigo-400 border border-indigo-400/30">
+                            LIVE
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-[var(--theme-text-dim,#94A3B8)] truncate block">
+                          {isHindi ? 'सैनिटी से सीधे प्रकाशित नए लेख' : 'Live editorial dispatch from Sanity CMS'}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-[var(--theme-text-dim,#64748B)] shrink-0 group-hover:text-indigo-400 transition-colors" />
                   </button>
 
                   {/* Wealth Academy */}

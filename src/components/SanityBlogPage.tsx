@@ -41,16 +41,16 @@ import {
   COMMERCIAL_ARTICLES,
   CommercialArticle
 } from '../data/newsPortalData';
+import { getSanityPosts, urlFor } from '../utils/sanityClient';
 
-
-interface CommercialNewsPortalPageProps {
+interface SanityBlogPageProps {
   onBack: () => void;
   language: AppLanguage;
   initialArticleId?: string | null;
   onNavigateTab?: (tab: string) => void;
 }
 
-export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> = ({
+export const SanityBlogPage: React.FC<SanityBlogPageProps> = ({
   onBack,
   language,
   initialArticleId,
@@ -58,12 +58,17 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [selectedArticle, setSelectedArticle] = useState<CommercialArticle | null>(() => {
-    if (initialArticleId) {
-      return COMMERCIAL_ARTICLES.find(a => a.id === initialArticleId) || null;
+  const [selectedArticle, setSelectedArticle] = useState<CommercialArticle | null>(null);
+
+  // Live dynamic posts from Sanity CMS
+  const [sanityArticles, setSanityArticles] = useState<CommercialArticle[]>([]);
+
+  useEffect(() => {
+    if (initialArticleId && sanityArticles.length > 0 && !selectedArticle) {
+      const found = sanityArticles.find(a => a.id === initialArticleId);
+      if (found) setSelectedArticle(found);
     }
-    return null;
-  });
+  }, [initialArticleId, sanityArticles, selectedArticle]);
 
   // Bookmarked articles in localStorage
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(() => {
@@ -85,12 +90,68 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
 
   const isHindi = language === 'hi' || language === 'hinglish';
 
-
-
-  // Filtered articles
-  const allArticles = useMemo(() => {
-    return COMMERCIAL_ARTICLES;
+  useEffect(() => {
+    let isMounted = true;
+    getSanityPosts().then(posts => {
+      if (!isMounted || !posts || posts.length === 0) return;
+      const formatted: CommercialArticle[] = posts.map(p => ({
+        id: `sanity-${p._id}`,
+        title: p.title || 'Untitled Post',
+        hindiTitle: p.title || 'शीर्षक उपलब्ध नहीं',
+        subtitle: p.summary || 'Live editorial dispatch from Sanity CMS',
+        hindiSubtitle: p.summary || 'सैनिटी सीएमएस से लाइव प्रकाशित संपादकीय लेख',
+        category: 'economy',
+        categoryLabel: {
+          en: p.category || 'Live Blog',
+          hi: p.category || 'लाइव ब्लॉग'
+        },
+        readTime: p.readTime || '5 min read',
+        heroImageGradient: 'from-blue-900 to-indigo-950',
+        heroBadge: 'SANITY LIVE',
+        publishedAt: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently Published',
+        author: {
+          name: p.authorName || 'Daily Khata Editorial',
+          role: p.authorRole || 'Contributor',
+          organization: 'Sanity Cloud Studio',
+          avatarInitials: p.authorName ? p.authorName.slice(0, 2).toUpperCase() : 'DK'
+        },
+        keyTakeaways: [
+          {
+            en: p.summary || p.title,
+            hi: p.summary || p.title
+          }
+        ],
+        marketImpact: {
+          status: 'Strategic Outlook',
+          sentimentLabel: 'Live Feed'
+        },
+        contentSections: [
+          {
+            heading: 'Overview & Analysis',
+            hindiHeading: 'मुख्य विश्लेषण व समीक्षा',
+            paragraphs: [
+              {
+                en: p.bodyText || p.summary || '',
+                hi: p.bodyText || p.summary || ''
+              }
+            ]
+          }
+        ],
+        tags: p.tags && p.tags.length > 0 ? p.tags : ['LiveBlog', 'SanityCMS', 'Updates']
+      }));
+      setSanityArticles(formatted);
+    }).catch(err => {
+      console.warn('Sanity live fetch notice:', err);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  // Filtered articles (Only live Sanity CMS dynamic blogs)
+  const allArticles = useMemo(() => {
+    return sanityArticles;
+  }, [sanityArticles]);
 
   // Toggle bookmark
   const toggleBookmark = (id: string, e?: React.MouseEvent) => {
@@ -130,9 +191,7 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
 
       if (activeCategory === 'all') return true;
       if (activeCategory === 'saved') return bookmarkedIds.includes(article.id);
-      if (activeCategory === 'trending') return Boolean(article.isTrending);
-      if (activeCategory === 'research') return Boolean(article.isResearchPaper);
-
+      
       return article.category === activeCategory;
     });
   }, [allArticles, searchQuery, activeCategory, bookmarkedIds]);
@@ -207,48 +266,18 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
   };
 
   const categoriesList = [
-    { id: 'all', label: isHindi ? 'सभी लेख व रिसर्च' : 'All Reports', icon: Globe2 },
-    { id: 'economy', label: isHindi ? 'अर्थव्यवस्था व जीडीपी' : 'Macroeconomy & Growth', icon: Landmark },
-    { id: 'business', label: isHindi ? 'व्यापार व बाज़ार' : 'Business & Markets', icon: TrendingUp },
-    { id: 'tech-ai', label: isHindi ? 'एआई, टेक व फिनटेक' : 'Tech, AI & Fintech', icon: Cpu },
-    { id: 'wealth', label: isHindi ? 'पूंजी बाज़ार व वेल्थ' : 'Capital Markets & Wealth', icon: ShieldCheck },
-    { id: 'policy', label: isHindi ? 'टैक्स, बजट व नीतियां' : 'Tax & Regulations', icon: Scale },
-    { id: 'industry', label: isHindi ? 'स्टार्टअप्स व उद्योग' : 'Startups & Industry', icon: Building2 },
-    { id: 'research', label: isHindi ? 'अनुसंधान श्वेतपत्र' : 'Research Whitepapers', icon: FileText },
+    { id: 'all', label: isHindi ? 'सभी लेख' : 'All Articles', icon: Globe2 },
+    { id: 'economy', label: isHindi ? 'अर्थव्यवस्था' : 'Economy', icon: Landmark },
     { id: 'saved', label: `${isHindi ? 'सहेजे गए' : 'Saved'} (${bookmarkedIds.length})`, icon: Bookmark }
   ];
 
-  const featuredArticle = COMMERCIAL_ARTICLES.find(a => a.isFeatured) || COMMERCIAL_ARTICLES[0];
+  const featuredArticle = allArticles.find(a => a.isFeatured) || allArticles[0] || COMMERCIAL_ARTICLES[0];
   const currentBreaking = BREAKING_NEWS_HEADLINES[breakingIndex];
 
   return (
     <div className="min-h-screen bg-[var(--theme-bg,#070E18)] text-[var(--theme-text,#F8FAFC)] pb-24 font-sans selection:bg-[var(--theme-primary,#38BDF8)] selection:text-black">
-      {/* 1. Verified Macroeconomic Indicators Ticker Strip (Universal: Mobile & Desktop) */}
-      <header className="block bg-[var(--theme-surface,#0E1A29)] border-b border-[var(--theme-border,#213E61)]/80 text-[11px] overflow-x-auto no-scrollbar py-2 px-3 sticky top-0 z-30 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0 pr-3 border-r border-[var(--theme-border,#213E61)]">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-mono font-bold tracking-wider uppercase text-[10px] text-emerald-400">
-              {isHindi ? 'सत्यापित मानक' : 'BENCHMARKS'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar whitespace-nowrap">
-            {LIVE_MARKET_INDICES.map(idx => (
-              <div key={idx.symbol} className="flex items-center gap-1.5 font-mono text-[11.5px]">
-                <span className="font-bold text-[var(--theme-text,#F8FAFC)]">{idx.symbol}</span>
-                <span className="text-[var(--theme-primary,#38BDF8)] font-semibold">{idx.value}</span>
-                <span className="text-[10.5px] font-medium text-[var(--theme-text-dim,#94A3B8)] bg-white/5 px-1.5 py-0.2 rounded">
-                  {idx.change}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* 2. Top Portal Masthead */}
-      <section className="border-b border-[var(--theme-border,#213E61)] bg-[var(--theme-surface,#0E1A29)]/60 px-4 py-4 sm:py-6">
+      {/* 1. Top Portal Masthead */}
+      <section className="border-b border-[var(--theme-border,#213E61)] bg-[var(--theme-surface,#0E1A29)]/60 px-4 py-4 sm:py-6 sticky top-0 z-30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3">
@@ -265,7 +294,7 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-mono font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-[var(--theme-primary,#38BDF8)]/15 text-[var(--theme-primary,#38BDF8)] border border-[var(--theme-primary,#38BDF8)]/30">
-                    {isHindi ? 'वाणिज्यिक अनुसंधान व वित्तीय समाचार' : 'COMMERCIAL INTELLIGENCE & RESEARCH'}
+                    {isHindi ? 'लाइव ब्लॉग' : 'LIVE BLOG'}
                   </span>
                   <span className="hidden sm:inline-block text-[10px] font-mono text-[var(--theme-text-dim,#64748B)]">
                     {new Date().toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', {
@@ -277,12 +306,12 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                   </span>
                 </div>
                 <h1 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-[var(--theme-text,#F8FAFC)] mt-0.5">
-                  {isHindi ? 'ग्लोबल मार्केट, इकोनॉमी व रिसर्च पोर्टल' : 'Global Markets, Macro & Research Portal'}
+                  {isHindi ? 'सैनिटी लाइव ब्लॉग व संपादकीय' : 'Sanity Live CMS Blog & Editorial'}
                 </h1>
                 <p className="hidden sm:block text-xs sm:text-sm text-[var(--theme-text-dim,#94A3B8)] mt-0.5 max-w-2xl">
                   {isHindi
-                    ? 'कॉर्पोरेट वित्त, व्यापक आर्थिक नीतियां, फिनटेक नवाचार, उद्योग अनुसंधान और पूंजी बाज़ार की गहन समीक्षा'
-                    : 'Institutional economic insights, corporate policy analysis, fintech architecture & industrial research whitepapers'}
+                    ? 'सैनिटी हेडलेस सीएमएस से सीधे प्रकाशित आपके नए और ताज़ा ब्लॉग व संपादकीय लेख'
+                    : 'Your fresh, live blog updates and editorial posts published directly from Sanity CMS'}
                 </p>
               </div>
             </div>
@@ -311,166 +340,6 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
             </div>
           </div>
 
-          {/* Breaking News Flash Strip */}
-          <div className="mt-4 pt-3 border-t border-[var(--theme-border,#213E61)]/60 flex items-center gap-3 overflow-hidden">
-            <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">
-              <Flame className="w-3 h-3 text-rose-400 animate-pulse" />
-              {isHindi ? 'ताज़ा अलर्ट' : 'FLASH'}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-[var(--theme-text,#F8FAFC)] truncate font-medium">
-                <span className="font-bold text-[var(--theme-primary,#38BDF8)] mr-1.5">
-                  [{currentBreaking.tag}]
-                </span>
-                {isHindi ? currentBreaking.textHi : currentBreaking.textEn}
-              </p>
-            </div>
-          </div>
-
-          {/* Key Macroeconomic Indicators & Policy Benchmarks */}
-          <div className="mt-4 pt-3.5 border-t border-[var(--theme-border,#213E61)]/70 space-y-3">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold font-mono text-emerald-400">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{isHindi ? 'सत्यापित नीतिगत व नियामक मानक' : 'Verified Policy & Regulatory Benchmarks'}</span>
-                </span>
-                <span className="text-[10.5px] text-[var(--theme-text-dim,#94A3B8)] font-mono">
-                  {isHindi ? 'स्रोत: आरबीआई व वित्त मंत्रालय बुलेटिन' : 'Source: RBI, MoF & GST Council Official Gazettes'}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] text-sky-400 font-bold">
-                {isHindi ? 'नियमित रूप से सत्यापित' : 'Statutorily Verified'}
-              </span>
-            </div>
-
-            {/* 4 Pillars of Real Financial & Regulatory Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-              {/* Pillar 1: RBI Benchmark Policy */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-sky-400/50 transition-all shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-sky-400 font-mono tracking-wide">
-                      {isHindi ? 'आरबीआई रेपो दर' : 'RBI REPO RATE'}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-300">
-                      MPC Policy
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
-                      6.50%
-                    </span>
-                    <span className="text-[11px] font-mono text-emerald-400 font-bold">
-                      Neutral
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
-                    {isHindi
-                      ? 'ऋण व बैंक ब्याज दरों का केंद्रीय बेंचमार्क। स्टैंडिंग डिपॉजिट सुविधा (SDF): 6.25%।'
-                      : 'Anchors commercial lending & bank interest. Standing Deposit Facility (SDF) at 6.25%.'}
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
-                  <span>MSF: 6.75%</span>
-                  <span className="text-emerald-400 font-bold">Guarded</span>
-                </div>
-              </div>
-
-              {/* Pillar 2: Retail Inflation & Sovereign Yield */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-emerald-400 font-mono tracking-wide">
-                      {isHindi ? 'खुदरा मुद्रास्फीति (CPI)' : 'CPI INFLATION'}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300">
-                      Target 4±2%
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
-                      4.20%
-                    </span>
-                    <span className="text-[11px] font-mono text-emerald-400 font-bold">
-                      In-Band
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
-                    {isHindi
-                      ? 'उपभोक्ता मूल्य सूचकांक आरबीआई के 4% लक्ष्य दायरे में। 10-वर्षीय सरकारी बॉन्ड यील्ड: 6.84%।'
-                      : 'Consumer price index securely within RBI tolerance corridor. 10Y Sovereign G-Sec at 6.84%.'}
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
-                  <span>FX Reserves: $680B+</span>
-                  <span className="text-sky-400 font-bold">Record High</span>
-                </div>
-              </div>
-
-              {/* Pillar 3: MSME 45-Day Payment Mandate */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-amber-400/50 transition-all shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-400 font-mono tracking-wide">
-                      {isHindi ? 'एमएसएमई 45-दिन नियम' : 'SEC 43B(h) RULE'}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300">
-                      Statutory
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
-                      45 Days
-                    </span>
-                    <span className="text-[11px] font-mono text-amber-400 font-bold">
-                      Strict Cap
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
-                    {isHindi
-                      ? 'एमएसएमई को 45 दिनों में भुगतान न करने पर खरीदार की आयकर छूट रद्द। 3 गुना चक्रवृद्धि ब्याज दंड।'
-                      : 'Buyers withholding MSME payment past 45 days forfeit tax deductions under Income Tax Act.'}
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
-                  <span>Penal Interest: 3x RBI</span>
-                  <span className="text-amber-400 font-bold">Compounded</span>
-                </div>
-              </div>
-
-              {/* Pillar 4: Cyber Fraud Zero Liability */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[var(--theme-card,#132438)] to-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] hover:border-purple-400/50 transition-all shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-purple-400 font-mono tracking-wide">
-                      {isHindi ? 'शून्य ग्राहक देयता' : 'ZERO FRAUD LIABILITY'}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-300">
-                      RBI Directive
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-[var(--theme-text,#F8FAFC)]">
-                      100%
-                    </span>
-                    <span className="text-[11px] font-mono text-purple-400 font-bold">
-                      Protected
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--theme-text-dim,#94A3B8)] mt-1.5 leading-relaxed">
-                    {isHindi
-                      ? 'अनधिकृत डिजिटल निकासी की 3 दिन में सूचना देने पर शून्य नुकसान। 10 दिनों में बैंक शैडो क्रेडिट।'
-                      : 'Zero customer liability if unauthorized banking fraud is reported within 3 days. Dial 1930.'}
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-[var(--theme-border,#213E61)]/50 flex items-center justify-between text-[10px] font-mono text-[var(--theme-text-muted,#CBD5E1)]">
-                  <span>Helpline: 1930</span>
-                  <span className="text-purple-400 font-bold">10-Day Credit</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -534,30 +403,6 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                   {isHindi ? featuredArticle.hindiSubtitle : featuredArticle.subtitle}
                 </p>
 
-                {/* Key Metrics Strip */}
-                {featuredArticle.keyStats && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                    {featuredArticle.keyStats.map((stat, idx) => (
-                      <div
-                        key={idx}
-                        className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800"
-                      >
-                        <div className="text-base sm:text-lg font-mono font-black text-[var(--theme-primary,#38BDF8)]">
-                          {stat.value}
-                        </div>
-                        <div className="text-[10.5px] text-slate-400 truncate">
-                          {isHindi ? stat.hindiLabel : stat.label}
-                        </div>
-                        {stat.change && (
-                          <div className="text-[9.5px] font-mono text-emerald-400 font-bold">
-                            {stat.change}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 {/* Author Credentials */}
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800">
                   <div className="flex items-center gap-2.5">
@@ -588,35 +433,10 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                       )}
                     </button>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--theme-primary,#38BDF8)] text-slate-950 font-bold text-xs group-hover:scale-105 transition-transform shadow-md">
-                      {isHindi ? 'पूरी रिपोर्ट पढ़ें' : 'Read Full Investigation'}
+                      {isHindi ? 'पूरा लेख पढ़ें' : 'Read Article'}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
-                </div>
-              </div>
-
-              {/* Decorative Side Highlights */}
-              <div className="hidden lg:flex flex-col justify-between w-72 shrink-0 p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4">
-                <div className="space-y-2">
-                  <span className="text-[10.5px] font-mono uppercase font-bold text-amber-400 tracking-wider">
-                    {isHindi ? 'मुख्य कार्यकारी निष्कर्ष' : 'EXECUTIVE SUMMARY'}
-                  </span>
-                  <ul className="space-y-2 text-xs text-slate-300">
-                    {featuredArticle.keyTakeaways.slice(0, 2).map((takeaway, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span className="line-clamp-3 text-[11px] leading-relaxed">
-                          {isHindi ? takeaway.hi : takeaway.en}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                  <span>{isHindi ? 'मार्केट प्रभाव:' : 'Market Impact:'}</span>
-                  <span className="font-bold text-emerald-400">
-                    {featuredArticle.marketImpact.status}
-                  </span>
                 </div>
               </div>
             </div>
@@ -681,11 +501,7 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-[9.5px] font-mono font-black uppercase px-2 py-0.5 rounded border ${
-                              article.isResearchPaper
-                                ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
-                                : 'bg-[var(--theme-primary,#38BDF8)]/15 text-[var(--theme-primary,#38BDF8)] border-[var(--theme-primary,#38BDF8)]/30'
-                            }`}
+                            className="text-[9.5px] font-mono font-black uppercase px-2 py-0.5 rounded border bg-[var(--theme-primary,#38BDF8)]/15 text-[var(--theme-primary,#38BDF8)] border-[var(--theme-primary,#38BDF8)]/30"
                           >
                             {article.heroBadge}
                           </span>
@@ -786,7 +602,7 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                 required
                 value={newsletterEmail}
                 onChange={e => setNewsletterEmail(e.target.value)}
-                placeholder={isHindi ? 'अपना ईमेल दर्ज करें...' : 'Enter your corporate email...'}
+                placeholder={isHindi ? 'अपना ईमेल दर्ज करें...' : 'Enter your email...'}
                 className="w-full bg-[var(--theme-bg,#070E18)] border border-[var(--theme-border,#213E61)] rounded-xl py-2.5 px-4 text-xs text-[var(--theme-text,#F8FAFC)] placeholder:text-[var(--theme-text-dim,#64748B)] focus:outline-none focus:border-[var(--theme-primary,#38BDF8)]"
               />
               <button
@@ -940,9 +756,6 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                     <span className="text-xs font-mono text-[var(--theme-text-dim,#94A3B8)]">
                       {selectedArticle.publishedAt}
                     </span>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                      {selectedArticle.marketImpact.status}
-                    </span>
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
@@ -969,44 +782,7 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                   </div>
                 </div>
 
-                {/* Key Executive Takeaways */}
-                <div className="p-5 rounded-2xl bg-[var(--theme-card,#132438)]/60 border border-[var(--theme-border,#213E61)] space-y-2.5">
-                  <span className="text-[11px] font-mono uppercase font-bold text-amber-400 tracking-wider block">
-                    {isHindi ? 'प्रमुख कार्यकारी निष्कर्ष (KEY TAKEAWAYS)' : 'EXECUTIVE SUMMARY TAKEAWAYS'}
-                  </span>
-                  <ul className="space-y-2">
-                    {selectedArticle.keyTakeaways.map((takeaway, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-200 leading-relaxed">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>{isHindi ? takeaway.hi : takeaway.en}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
-                {/* Key Metrics Strip if available */}
-                {selectedArticle.keyStats && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {selectedArticle.keyStats.map((stat, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-xl bg-[var(--theme-bg,#070E18)] border border-[var(--theme-border,#213E61)]"
-                      >
-                        <div className="text-lg font-mono font-black text-[var(--theme-primary,#38BDF8)]">
-                          {stat.value}
-                        </div>
-                        <div className="text-[11px] text-slate-400 truncate">
-                          {isHindi ? stat.hindiLabel : stat.label}
-                        </div>
-                        {stat.change && (
-                          <div className="text-[10px] font-mono text-emerald-400 font-bold">
-                            {stat.change}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {/* Content Sections */}
                 <div
@@ -1065,11 +841,6 @@ export const CommercialNewsPortalPage: React.FC<CommercialNewsPortalPageProps> =
                     ))}
                   </div>
 
-                  <p className="text-[11px] text-slate-500 italic leading-relaxed">
-                    {isHindi
-                      ? 'अस्वीकरण: यह सामग्री केवल वाणिज्यिक अनुसंधान, शैक्षणिक एवं सूचनात्मक उद्देश्यों के लिए प्रकाशित की गई है। इसे वित्तीय निवेश सलाह के रूप में न लिया जाए।'
-                      : 'Commercial Disclosure: Published strictly for institutional research and general educational intelligence. Does not constitute personal investment or fiduciary advice.'}
-                  </p>
                 </div>
               </div>
             </motion.div>
