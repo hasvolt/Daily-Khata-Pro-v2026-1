@@ -129,74 +129,6 @@ export const setStoredToken = (token: string | null, expiresInSeconds: number = 
 // In-memory token cache
 let cachedAccessToken: string | null = getStoredToken();
 let isSigningIn = false;
-let gisTokenClient: any = null;
-
-/**
- * Initialize Google Identity Services (GIS) Token Client for silent token renewal
- */
-export const initGisClient = () => {
-  if (gisTokenClient) return gisTokenClient;
-  if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
-    try {
-      gisTokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: firebaseConfig.oAuthClientId,
-        scope: DRIVE_SCOPES.join(' '),
-        callback: () => {}
-      });
-      return gisTokenClient;
-    } catch (e) {
-      console.warn('[Google Drive] GIS init note:', e);
-    }
-  }
-  return null;
-};
-
-/**
- * Silent token renewal using Google Identity Services (no intrusive popup)
- */
-export const silentRefreshToken = async (hintEmail?: string): Promise<string | null> => {
-  const email = hintEmail || auth.currentUser?.email || getStoredUserProfile()?.email || undefined;
-  const client = initGisClient();
-  if (!client) return null;
-
-  return new Promise<string | null>((resolve) => {
-    let resolved = false;
-    const timer = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve(null);
-      }
-    }, 6000);
-
-    client.callback = (resp: any) => {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timer);
-        if (resp && resp.access_token) {
-          cachedAccessToken = resp.access_token;
-          const expiresIn = resp.expires_in ? parseInt(resp.expires_in, 10) : 3600;
-          setStoredToken(resp.access_token, expiresIn);
-          resolve(resp.access_token);
-        } else {
-          resolve(null);
-        }
-      }
-    };
-
-    try {
-      client.requestAccessToken({
-        prompt: '',
-        hint: email
-      });
-    } catch (err) {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timer);
-        resolve(null);
-      }
-    }
-  });
-};
 
 /**
  * Create Google Auth Provider with offline access and email hint
@@ -241,14 +173,7 @@ export const initAuth = (
       };
       setStoredUserProfile(profile);
 
-      let token = cachedAccessToken || getStoredToken();
-      if (!token || isTokenExpired()) {
-        // Attempt background silent refresh
-        const fresh = await silentRefreshToken(user.email || undefined).catch(() => null);
-        if (fresh) {
-          token = fresh;
-        }
-      }
+      const token = cachedAccessToken || getStoredToken();
 
       if (onAuthSuccess) {
         onAuthSuccess(user, token);
@@ -327,12 +252,6 @@ export const getOrRefreshAccessToken = async (interactive: boolean = false): Pro
     return stored;
   }
 
-  // Attempt silent background refresh
-  const silentlyRefreshed = await silentRefreshToken().catch(() => null);
-  if (silentlyRefreshed) {
-    return silentlyRefreshed;
-  }
-
   // If we still have stored token, attempt to use it
   if (stored) {
     cachedAccessToken = stored;
@@ -383,13 +302,8 @@ async function executeDriveRequest(
 
   let res = await requestFn(token);
   if (res.status === 401) {
-    console.warn('[Google Drive] Token expired (401). Attempting automatic renewal...');
-    // Try silent refresh first
-    const fresh = await silentRefreshToken().catch(() => null);
-    if (fresh) {
-      token = fresh;
-      res = await requestFn(token);
-    } else if (interactiveOnFail) {
+    console.warn('[Google Drive] Token expired (401).');
+    if (interactiveOnFail) {
       // Re-authenticate seamlessly with login_hint
       const reauth = await googleSignIn(true);
       token = reauth.accessToken;
@@ -405,19 +319,21 @@ export const AUTO_SYNC_FILE_NAME = 'daily-khata-pro-auto-sync.json';
 /**
  * List existing Daily Khata Pro backups on Google Drive
  */
-export const listDriveBackups = async (): Promise<DriveFileInfo[]> => {
+export const listDriveBackups = async (interactiveOnFail: boolean = true): Promise<DriveFileInfo[]> => {
   const query = encodeURIComponent(
     "trashed = false and (name contains 'daily-khata-pro' or name contains 'Daily Khata')"
   );
   const fields = encodeURIComponent('files(id, name, modifiedTime, size, description, webViewLink)');
   const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=${fields}&orderBy=modifiedTime desc`;
 
-  const res = await executeDriveRequest((token) =>
-    fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+  const res = await executeDriveRequest(
+    (token) =>
+      fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }),
+    interactiveOnFail
   );
 
   if (!res.ok) {
@@ -439,7 +355,7 @@ export const uploadBackupToDrive = async (
   isAutoSync: boolean = false
 ): Promise<{ fileId: string; modifiedTime: string; webViewLink?: string }> => {
   // Find if this specific file already exists on user's drive
-  const existingFiles = await listDriveBackups().catch(() => []);
+  const existingFiles = await listDriveBackups(!isAutoSync).catch(() => []);
   const targetFile = existingFiles.find((f) => f.name === fileName);
 
   const totalEntries = Array.isArray(backupData?.entries) ? backupData.entries.length : 0;
