@@ -64,8 +64,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab, l
                 <div
                   className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-[var(--theme-btn-bg,#0284C7)] text-[var(--theme-btn-text,#FFFFFF)] ring-3 sm:ring-4 ring-[var(--theme-primary-border,rgba(56,189,248,0.5))] shadow-lg scale-105'
-                      : 'bg-gradient-to-tr from-[var(--theme-btn-bg,#0284C7)] via-[var(--theme-btn-bg,#0284C7)] to-[var(--theme-primary,#38BDF8)] text-[var(--theme-btn-text,#FFFFFF)] hover:scale-105 shadow-md ring-2 sm:ring-3 ring-[var(--theme-surface,#0E1A29)]'
+                      ? 'bg-[var(--theme-btn-bg,#D97706)] text-[var(--theme-btn-text,#FFFFFF)] ring-3 sm:ring-4 ring-[var(--theme-primary-border,rgba(56,189,248,0.5))] shadow-lg scale-105'
+                      : 'bg-gradient-to-tr from-[var(--theme-btn-bg,#D97706)] via-[var(--theme-btn-bg,#D97706)] to-[var(--theme-primary,#38BDF8)] text-[var(--theme-btn-text,#FFFFFF)] hover:scale-105 shadow-md ring-2 sm:ring-3 ring-[var(--theme-surface,#0E1A29)]'
                   }`}
                   style={{
                     boxShadow: isActive
@@ -75,7 +75,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab, l
                 >
                   <Plus className="w-5 h-5 sm:w-7 sm:h-7 stroke-[3] text-[var(--theme-btn-text,#FFFFFF)] transition-transform group-hover:rotate-90 duration-200" />
                 </div>
-                <span className="text-[10px] sm:text-[13px] font-black text-[var(--theme-primary,#0284C7)] mt-0.5 sm:mt-1 tracking-tight truncate max-w-full">
+                <span className="text-[10px] sm:text-[13px] font-black text-[var(--theme-primary,#D97706)] mt-0.5 sm:mt-1 tracking-tight truncate max-w-full">
                   {tab.label}
                 </span>
               </button>

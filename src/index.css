@@ -17,7 +17,7 @@
     --theme-text-muted: #8BA4D0;
     --theme-text-dim: #5572A1;
     --theme-badge-text: #38BDF8;
-    --theme-btn-bg: #0284C7;
+    --theme-btn-bg: #D97706;
     --theme-btn-hover: #0EA5E9;
     --theme-btn-text: #FFFFFF;
   }
@@ -37,7 +37,7 @@
     --theme-text-muted: #8BA4D0;
     --theme-text-dim: #5572A1;
     --theme-badge-text: #38BDF8;
-    --theme-btn-bg: #0284C7;
+    --theme-btn-bg: #D97706;
     --theme-btn-hover: #0EA5E9;
     --theme-btn-text: #FFFFFF;
   }
@@ -183,11 +183,11 @@
   }
 
   [data-theme="light"] {
-    --theme-primary: #0284C7;
-    --theme-primary-hover: #0369A1;
-    --theme-primary-dim: rgba(2, 132, 199, 0.12);
-    --theme-primary-border: rgba(2, 132, 199, 0.35);
-    --theme-glow: rgba(2, 132, 199, 0.12);
+    --theme-primary: #D97706;
+    --theme-primary-hover: #B45309;
+    --theme-primary-dim: rgba(217, 119, 6, 0.12);
+    --theme-primary-border: rgba(217, 119, 6, 0.35);
+    --theme-glow: rgba(217, 119, 6, 0.12);
     --theme-bg: #F1F5F9;
     --theme-surface: #FFFFFF;
     --theme-card: #FFFFFF;
@@ -196,18 +196,18 @@
     --theme-text: #0F172A;
     --theme-text-muted: #475569;
     --theme-text-dim: #64748B;
-    --theme-badge-text: #0284C7;
-    --theme-btn-bg: #0284C7;
-    --theme-btn-hover: #0369A1;
+    --theme-badge-text: #D97706;
+    --theme-btn-bg: #D97706;
+    --theme-btn-hover: #B45309;
     --theme-btn-text: #FFFFFF;
   }
 
   [data-theme="white"] {
-    --theme-primary: #2563EB;
-    --theme-primary-hover: #1D4ED8;
-    --theme-primary-dim: rgba(37, 99, 235, 0.10);
-    --theme-primary-border: rgba(37, 99, 235, 0.30);
-    --theme-glow: rgba(37, 99, 235, 0.08);
+    --theme-primary: #D97706;
+    --theme-primary-hover: #B45309;
+    --theme-primary-dim: rgba(217, 119, 6, 0.10);
+    --theme-primary-border: rgba(217, 119, 6, 0.30);
+    --theme-glow: rgba(217, 119, 6, 0.08);
     --theme-bg: #FFFFFF;
     --theme-surface: #F8FAFC;
     --theme-card: #FFFFFF;
@@ -216,9 +216,9 @@
     --theme-text: #0F172A;
     --theme-text-muted: #475569;
     --theme-text-dim: #64748B;
-    --theme-badge-text: #1D4ED8;
-    --theme-btn-bg: #2563EB;
-    --theme-btn-hover: #1D4ED8;
+    --theme-badge-text: #B45309;
+    --theme-btn-bg: #D97706;
+    --theme-btn-hover: #B45309;
     --theme-btn-text: #FFFFFF;
   }
 
@@ -418,8 +418,8 @@
 [data-theme="white"] button.bg-\[\#EF4444\],
 [data-theme="light"] button.bg-\[\#10B981\],
 [data-theme="white"] button.bg-\[\#10B981\],
-[data-theme="light"] button.bg-\[\#0284C7\],
-[data-theme="white"] button.bg-\[\#0284C7\],
+[data-theme="light"] button.bg-\[\#D97706\],
+[data-theme="white"] button.bg-\[\#D97706\],
 [data-theme="light"] button.bg-\[\#2563EB\],
 [data-theme="white"] button.bg-\[\#2563EB\],
 [data-theme="light"] button.theme-btn-primary,
@@ -432,7 +432,7 @@
 /* High contrast accent color adjustments for Daylight */
 [data-theme="light"] .text-\[\#38BDF8\],
 [data-theme="white"] .text-\[\#38BDF8\] {
-  color: #0284C7;
+  color: #D97706;
 }
 
 [data-theme="light"] .text-\[\#10B981\],
@@ -647,7 +647,7 @@
 [data-theme="white"] .banking-card-3d .banking-card-date-box {
   background-color: #E0F2FE !important;
   border-color: #BAE6FD !important;
-  color: #0284C7 !important;
+  color: #D97706 !important;
 }
 
 [data-theme="light"] .banking-card-3d .banking-card-date,
@@ -735,7 +735,7 @@
 [data-theme="white"] select:focus,
 [data-theme="light"] textarea:focus,
 [data-theme="white"] textarea:focus {
-  border-color: var(--theme-primary, #0284C7);
+  border-color: var(--theme-primary, #D97706);
   box-shadow: 0 0 0 2px var(--theme-primary-dim, rgba(2, 132, 199, 0.15));
 }
 

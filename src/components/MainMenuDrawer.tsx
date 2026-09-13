@@ -225,7 +225,7 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 onClick={() => {
                   triggerHapticSound('click');
                   if (isLightMode) {
-                    onThemeChange('blue');
+                    onThemeChange('yellow');
                   } else {
                     onThemeChange('light');
                   }
@@ -454,7 +454,7 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                       { id: 'orange', name: 'Sunset Copper', hindiName: 'सनसेट संतरी', mode: 'Dark', primaryHex: '#FB923C', bgHex: '#431407' },
                       { id: 'pink', name: 'Ruby Pink', hindiName: 'रूबी गुलाबी', mode: 'Dark', primaryHex: '#F472B6', bgHex: '#500724' },
                       { id: 'black', name: 'Pitch OLED', hindiName: 'ओलेड ब्लैक', mode: 'OLED', primaryHex: '#38BDF8', bgHex: '#000000' },
-                      { id: 'light', name: 'Modern Studio', hindiName: 'मॉडर्न लाइट', mode: 'Light', primaryHex: '#0284C7', bgHex: '#F1F5F9' },
+                      { id: 'light', name: 'Modern Studio', hindiName: 'मॉडर्न लाइट', mode: 'Light', primaryHex: '#D97706', bgHex: '#F1F5F9' },
                       { id: 'white', name: 'Clean Paper', hindiName: 'सफेद मिनिमल', mode: 'Light', primaryHex: '#2563EB', bgHex: '#FFFFFF' }
                     ];
 

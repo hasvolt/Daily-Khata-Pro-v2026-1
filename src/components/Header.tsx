@@ -433,14 +433,14 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={() => {
                 if (isLightMode) {
-                  onThemeChange('blue');
+                  onThemeChange('yellow');
                 } else {
                   onThemeChange('light');
                 }
               }}
               className={`h-8 sm:h-9 w-8 sm:w-auto sm:min-w-[36px] px-0 sm:px-2.5 rounded-lg sm:rounded-xl border transition-all cursor-pointer shadow-xs active:scale-95 text-[11px] font-bold flex items-center justify-center gap-1.5 shrink-0 ${
                 isLightMode
-                  ? 'bg-[#0284C7]/15 border-[#0284C7]/40 text-[#0284C7] hover:bg-[#0284C7]/25'
+                  ? 'bg-[#D97706]/15 border-[#D97706]/40 text-[#D97706] hover:bg-[#D97706]/25'
                   : 'bg-[var(--theme-card,#132438)] border-[var(--theme-border,#213E61)] text-[var(--theme-text-muted,#94A3B8)] hover:text-[var(--theme-text,#F8FAFC)] hover:border-[var(--theme-primary,#38BDF8)]'
               }`}
               title={isLightMode ? 'Switch to Night Mode' : 'Switch to Day Mode'}

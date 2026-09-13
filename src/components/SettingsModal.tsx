@@ -570,7 +570,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'cyan', label: 'Ocean Teal', dot: '#06B6D4' },
     { id: 'pink', label: 'Crimson Pink', dot: '#F472B6' },
     { id: 'black', label: 'Obsidian Black', dot: '#171717' },
-    { id: 'light', label: tStr('दिन / वाइट मोड (Daylight)', 'Day / White Mode (Daylight)', 'Daylight White'), dot: '#0284C7', isLight: true },
+    { id: 'light', label: tStr('दिन / वाइट मोड (Daylight)', 'Day / White Mode (Daylight)', 'Daylight White'), dot: '#D97706', isLight: true },
     { id: 'white', label: tStr('आउटडोर प्योर वाइट', 'Outdoor Pure White', 'Outdoor Pure White'), dot: '#2563EB', isLight: true }
   ];
 
@@ -2042,7 +2042,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             if (onUpdateLifeTags) onUpdateLifeTags(DEFAULT_LIFE_TAGS);
             if (onLayoutChange) onLayoutChange('dashboard');
             if (onViewModeChange) onViewModeChange('auto');
-            if (onThemeChange) onThemeChange('blue');
+            if (onThemeChange) onThemeChange('yellow');
             setConfirmAction(null);
             showFeedback('success', tStr('सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो गईं!', 'Sabhi settings default par reset ho gayin!', 'All settings restored to defaults!'));
           }}
