@@ -38,6 +38,7 @@ import { FUND_ORDER, FUND_LABELS, FUND_CONFIGS, DEFAULT_PERCENTAGES } from '../d
 import { formatCurrency, triggerHapticSound } from '../utils/khataCalculations';
 import { playKeypadSound, playIncomeSound, playDeleteSound } from '../utils/audioService';
 import { printCalculatorSlip, downloadCalculatorSlipHTML, CalcPrintParams } from '../utils/calculatorPrint';
+import { evaluateFinancialMath } from '../utils/calculatorEngine';
 
 export type CalculatorViewType = 'standard' | 'currency' | 'emi' | 'sip' | 'funds' | 'gst' | 'discount' | 'inflation';
 
@@ -75,41 +76,9 @@ function formatIndianWords(num: number): string {
   return '';
 }
 
-// Fast & safe math expression evaluator for arithmetic calculator
+// Fast & safe math expression evaluator for arithmetic calculator with compound percentage precedence
 function evaluateMath(raw: string): { result: number | null; error: string | null } {
-  if (!raw || !raw.trim()) return { result: null, error: null };
-  try {
-    let sanitized = raw
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/−/g, '-');
-
-    // Strip trailing operators and spaces so expressions like "50 +" evaluate to 50 instead of erroring
-    sanitized = sanitized.replace(/[\s+\-*/]+$/, '');
-    if (!sanitized.trim()) return { result: null, error: null };
-
-    // Handle percentage logic e.g., "1000 + 18%" -> 1180 or "500 * 20%" -> 100
-    sanitized = sanitized.replace(/(\d+(\.\d+)?)\s*([+\-])\s*(\d+(\.\d+)?)\s*%/g, (_, base, _d1, op, pct) => {
-      const b = parseFloat(base);
-      const p = parseFloat(pct);
-      const amt = (b * p) / 100;
-      return `${b} ${op} ${amt}`;
-    });
-    sanitized = sanitized.replace(/(\d+(\.\d+)?)\s*%/g, '($1/100)');
-
-    if (!/^[\d\s+\-*/.()]+$/.test(sanitized)) {
-      return { result: null, error: 'Invalid' };
-    }
-
-    // eslint-disable-next-line no-new-func
-    const val = Function(`"use strict"; return (${sanitized})`)();
-    if (typeof val === 'number' && !isNaN(val) && isFinite(val)) {
-      return { result: Math.round(val * 1000000) / 1000000, error: null };
-    }
-    return { result: null, error: 'Error' };
-  } catch {
-    return { result: null, error: 'Invalid' };
-  }
+  return evaluateFinancialMath(raw);
 }
 
 export const CalculatorPage: React.FC<CalculatorPageProps> = ({

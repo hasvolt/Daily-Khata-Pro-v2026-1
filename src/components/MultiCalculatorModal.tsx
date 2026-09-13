@@ -28,6 +28,7 @@ import {
 import { FundType, AppLanguage } from '../types';
 import { FUND_ORDER, FUND_LABELS, FUND_CONFIGS, DEFAULT_PERCENTAGES } from '../data/defaults';
 import { formatCurrency, triggerHapticSound } from '../utils/khataCalculations';
+import { evaluateFinancialMath } from '../utils/calculatorEngine';
 import { TRANSLATIONS } from '../utils/translations';
 import { getAppTranslation } from '../utils/appTranslations';
 
@@ -68,42 +69,9 @@ function formatIndianWords(num: number): string {
   return '';
 }
 
-// Safe math evaluator for standard arithmetic calculator
+// Safe math evaluator for standard arithmetic calculator with compound percentage precedence
 function safeEvaluate(expr: string): { result: number | null; error: string | null } {
-  try {
-    let sanitized = expr
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/−/g, '-');
-
-    sanitized = sanitized.replace(/(\d+(\.\d+)?)\s*([+\-])\s*(\d+(\.\d+)?)\s*%/g, (_, base, _d1, op, pct) => {
-      const b = parseFloat(base);
-      const p = parseFloat(pct);
-      const amt = (b * p) / 100;
-      return `${b} ${op} ${amt}`;
-    });
-    sanitized = sanitized.replace(/(\d+(\.\d+)?)\s*%/g, '($1/100)');
-
-    // Strip trailing operator for live preview calculation
-    sanitized = sanitized.trim().replace(/[\s+\-*/]+$/, '').trim();
-
-    if (!sanitized) {
-      return { result: null, error: null };
-    }
-
-    if (!/^[\d\s+\-*/.()]+$/.test(sanitized)) {
-      return { result: null, error: 'Invalid' };
-    }
-
-    // eslint-disable-next-line no-new-func
-    const val = Function(`"use strict"; return (${sanitized})`)();
-    if (typeof val === 'number' && !isNaN(val) && isFinite(val)) {
-      return { result: Math.round(val * 1000000) / 1000000, error: null };
-    }
-    return { result: null, error: 'Math Error' };
-  } catch (err) {
-    return { result: null, error: 'Invalid Expression' };
-  }
+  return evaluateFinancialMath(expr);
 }
 
 export const MultiCalculatorModal: React.FC<MultiCalculatorModalProps> = ({
