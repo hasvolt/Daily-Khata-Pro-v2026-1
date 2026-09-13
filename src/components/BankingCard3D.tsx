@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { Wallet, Calendar, Plus, Minus, ShieldCheck } from 'lucide-react';
+import { Wallet, Calendar, ShieldCheck } from 'lucide-react';
 
 interface BankingCard3DProps {
   totalWealth: number;
@@ -144,10 +144,9 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
               <button
                 type="button"
                 onClick={() => onAddClick('income')}
-                className="py-1.5 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-2xl bg-[#059669] hover:bg-[#047857] active:bg-[#065F46] !text-white font-bold text-[12px] sm:text-[15.5px] flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-md shadow-black/25 hover:shadow-lg active:scale-95 cursor-pointer border border-[#047857]"
+                className="py-2 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-2xl bg-[#059669] hover:bg-[#047857] active:bg-[#065F46] !text-white font-bold text-[13px] sm:text-[15.5px] flex items-center justify-center gap-1.5 transition-all shadow-md shadow-black/25 hover:shadow-lg active:scale-95 cursor-pointer border border-[#047857]"
                 id="hero-add-income-btn"
               >
-                <Plus className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[3] !text-white shrink-0" />
                 <span className="truncate !text-white tracking-wide font-bold">
                   {isHindi ? '+ कमाई (Income)' : '+ Income'}
                 </span>
@@ -155,12 +154,11 @@ export function BankingCard3D({ totalWealth, formatCurrency, privacyMask, dateFo
               <button
                 type="button"
                 onClick={() => onAddClick('expense')}
-                className="py-1.5 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-2xl bg-[#DC2626] hover:bg-[#B91C1C] active:bg-[#991B1B] !text-white font-bold text-[12px] sm:text-[15.5px] flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-md shadow-black/25 hover:shadow-lg active:scale-95 cursor-pointer border border-[#B91C1C]"
+                className="py-2 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-2xl bg-[#DC2626] hover:bg-[#B91C1C] active:bg-[#991B1B] !text-white font-bold text-[13px] sm:text-[15.5px] flex items-center justify-center gap-1.5 transition-all shadow-md shadow-black/25 hover:shadow-lg active:scale-95 cursor-pointer border border-[#B91C1C]"
                 id="hero-add-expense-btn"
               >
-                <Minus className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[3] !text-white shrink-0" />
                 <span className="truncate !text-white tracking-wide font-bold">
-                  {isHindi ? '- खर्च (Expense)' : '- Expense'}
+                  {isHindi ? '− खर्च (Expense)' : '− Expense'}
                 </span>
               </button>
             </div>

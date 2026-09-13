@@ -155,7 +155,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const totalWealth = Object.values(fundTotals).reduce((sum, v) => sum + v, 0);
 
   return (
-    <div className="w-full max-w-6xl mx-auto pb-4 space-y-3 sm:space-y-7 animate-in fade-in duration-200">
+    <div className="w-full max-w-6xl mx-auto pb-8 sm:pb-12 space-y-3 sm:space-y-7 animate-in fade-in duration-200">
       {/* 1. TOTAL NET BALANCE BANNER (3D Animated) */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -362,10 +362,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </button>
 
               <div className="flex items-center gap-2 self-end sm:self-center px-1">
-                <span className="text-[10.5px] sm:text-[12px] text-[var(--theme-text-muted,#8BA4D0)] font-medium">
+                <span className="text-[11px] sm:text-[12px] text-[var(--theme-text-muted,#94A3B8)] font-medium">
                   {isHindi
-                    ? `होम पर 6 सक्रिय • कुल ${activeFunds.length} श्रेणियां`
-                    : `6 open on Home • ${activeFunds.length} total categories`}
+                    ? `${activeFunds.length} में से 6 श्रेणियां प्रदर्शित`
+                    : `6 of ${activeFunds.length} categories shown`}
                 </span>
               </div>
             </div>

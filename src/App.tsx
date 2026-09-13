@@ -2758,20 +2758,32 @@ function AppContent() {
           </div>
 
           {/* Trust Badges & Mission */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-[10px] font-bold text-green-400 shadow-xs hover:border-green-500/50 transition-colors">
-                <Globe className="w-3.5 h-3.5" />
-                <span>{typeof window !== 'undefined' ? window.location.hostname : 'rozfiber.com'}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-[10px] font-bold text-[var(--theme-primary,#38BDF8)] shadow-xs hover:border-[var(--theme-primary,#38BDF8)]/50 transition-colors">
-                <Code2 className="w-3.5 h-3.5" />
-                <span>Open Source (MIT)</span>
-              </div>
+          <div className="flex flex-col items-center gap-3 w-full">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+              <a
+                href="https://www.rozfiber.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-[12px] font-semibold text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 shadow-xs transition-all group cursor-pointer"
+                title="Visit Rozfiber Official Website"
+              >
+                <Globe className="w-3.5 h-3.5 shrink-0 group-hover:rotate-12 transition-transform" />
+                <span>www.rozfiber.com</span>
+              </a>
+              <a
+                href="https://github.com/hasvolt/Daily-Khata-Pro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--theme-surface,#0E1A29)] border border-[var(--theme-border,#213E61)] text-[12px] font-semibold text-[var(--theme-primary,#38BDF8)] hover:text-sky-300 hover:border-[var(--theme-primary,#38BDF8)]/60 shadow-xs transition-all group cursor-pointer"
+                title="View Official Source Code on GitHub"
+              >
+                <Code2 className="w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform" />
+                <span>Open Source Code (MIT)</span>
+              </a>
             </div>
 
-            <div className="max-w-md w-full px-4 text-center mt-2">
-              <p className="text-[11.5px] font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-[var(--theme-primary,#38BDF8)] to-indigo-400 leading-relaxed mb-3">
+            <div className="max-w-lg w-full px-4 text-center mt-1">
+              <p className="text-[12px] sm:text-[13px] font-semibold text-[var(--theme-text-muted,#94A3B8)] leading-relaxed mb-3">
                 {language === 'hi' 
                   ? 'निःशुल्क मानक संस्करण • नो मैंडेटरी सब्सक्रिप्शन • प्राइवेसी-फर्स्ट खाता • पारदर्शी नियम' 
                   : "Free Standard Edition • No Mandatory Subscription • Privacy-First Ledger • Transparent Terms"}
@@ -2782,17 +2794,17 @@ function AppContent() {
                   href="https://github.com/hasvolt/Daily-Khata-Pro" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-text,#F8FAFC)]/40 text-[var(--theme-text,#F8FAFC)] text-[11px] font-bold transition-all shadow-xs group"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--theme-card,#132438)] border border-[var(--theme-border,#213E61)] hover:border-[var(--theme-text,#F8FAFC)]/40 text-[var(--theme-text,#F8FAFC)] text-[12px] font-semibold transition-all shadow-xs hover:shadow-sm group"
                 >
-                  <Github className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                  <Github className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   <span>GitHub Repository</span>
                 </a>
                 
                 <button 
                   onClick={() => setCurrentTab('support-project')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--theme-primary-dim,rgba(56,189,248,0.1))] border border-[var(--theme-primary-border,rgba(56,189,248,0.2))] hover:border-[var(--theme-primary,#38BDF8)]/50 text-[var(--theme-primary,#38BDF8)] text-[11px] font-bold transition-all shadow-xs group"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--theme-primary-dim,rgba(56,189,248,0.1))] border border-[var(--theme-primary-border,rgba(56,189,248,0.2))] hover:border-[var(--theme-primary,#38BDF8)]/50 text-[var(--theme-primary,#38BDF8)] text-[12px] font-semibold transition-all shadow-xs hover:shadow-sm group cursor-pointer"
                 >
-                  <Heart className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-red-500 fill-red-500/20 group-hover:fill-red-500" />
+                  <Heart className="w-4 h-4 group-hover:scale-110 transition-transform text-red-500 fill-red-500/20 group-hover:fill-red-500" />
                   <span>{language === 'hi' ? 'प्रोजेक्ट सपोर्ट' : 'Support Project'}</span>
                 </button>
               </div>
@@ -2828,11 +2840,11 @@ function AppContent() {
             </div>
           </div>
 
-          <div className="w-32 h-px bg-gradient-to-r from-transparent via-[var(--theme-border,#213E61)]/50 to-transparent my-1"></div>
+          <div className="w-36 h-px bg-gradient-to-r from-transparent via-[var(--theme-border,#213E61)]/60 to-transparent my-1"></div>
 
           {/* Legal Links */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-[var(--theme-text-dim,#94A3B8)] pb-2 pt-1 font-medium">
-            <button onClick={() => setCurrentTab('news')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors text-[var(--theme-primary,#38BDF8)] font-bold">{language === 'hi' ? 'समाचार व रिसर्च' : 'News & Research'}</button>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12px] text-[var(--theme-text-muted,#94A3B8)] pb-2 pt-1 font-medium">
+            <button onClick={() => setCurrentTab('news')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors text-[var(--theme-primary,#38BDF8)] font-semibold">{language === 'hi' ? 'समाचार व रिसर्च' : 'News & Research'}</button>
             <span className="opacity-40">•</span>
             <button onClick={() => setCurrentTab('privacy')} className="hover:text-[var(--theme-text,#F8FAFC)] hover:underline cursor-pointer transition-colors">Privacy Policy</button>
             <span className="opacity-40">•</span>
@@ -2848,8 +2860,8 @@ function AppContent() {
           </div>
 
           {/* Copyright Only */}
-          <p className="text-[10.5px] text-[var(--theme-text-dim,#64748B)] flex items-center justify-center gap-1.5 pb-20 sm:pb-24">
-            © {new Date().getFullYear()} Daily Khata Pro. Made with <Heart className="w-3 h-3 text-red-500 inline fill-red-500" />
+          <p className="text-[11.5px] text-[var(--theme-text-dim,#64748B)] flex items-center justify-center gap-1.5 pb-20 sm:pb-24">
+            © {new Date().getFullYear()} Daily Khata Pro. Made with <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500" />
           </p>
         </div>
       </footer>
